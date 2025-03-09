@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Project Webcrafters
+
+## Overview
+Project Webcrafters is a Next.js 15 and React 19-based web development setup designed with best practices in mind. It includes Tailwind CSS for styling, ESLint and Prettier for code quality, Husky for Git hooks, and ShadCN for UI components.
+
+## Features
+- **[Next.js 15](https://nextjs.org/)**: The latest version of the Next.js framework for optimized performance.
+- **[React 19](https://react.dev/)**: Uses the latest React version.
+- **[Tailwind CSS](https://tailwindcss.com/)**: A utility-first CSS framework for rapid UI development.
+- **[ShadCN](https://ui.shadcn.com/)**: A collection of beautifully designed UI components.
+- **[ESLint](https://eslint.org/)**: Linting support for better code consistency.
+- **[Prettier](https://prettier.io/)**: Automatic code formatting.
+- **[Husky](https://typicode.github.io/husky/)**: Ensures Git hooks are applied for pre-commit checks.
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+- [Node.js](https://nodejs.org/) (Recommended: latest LTS version)
+- [Yarn](https://yarnpkg.com/)
 
-```bash
-npm run dev
-# or
+### Installation
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/yourusername/project-webcrafters.git
+   cd project-webcrafters
+   ```
+2. Install dependencies:
+   ```sh
+   yarn install
+   ```
+
+### Development Server
+To start the development server:
+```sh
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+This will start the Next.js development server at [http://localhost:3000/](http://localhost:3000/).
+
+### Building for Production
+To build the project for production:
+```sh
+yarn build
+```
+After building, start the production server:
+```sh
+yarn start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Linting and Formatting
+- **Lint the code:**
+  ```sh
+  yarn lint
+  ```
+- **Format the code:**
+  ```sh
+  yarn format
+  ```
+- **Check for formatting issues:**
+  ```sh
+  yarn format:check
+  ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Git Hooks with Husky
+Husky ensures that linting and formatting rules are followed before committing code.
+- Install Husky:
+  ```sh
+  yarn prepare
+  ```
+- Husky and `lint-staged` automatically format files before committing.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Additional Notes
+- This project uses [`clsx`](https://github.com/lukeed/clsx) and [`tailwind-merge`](https://github.com/dcastil/tailwind-merge) for efficient class management in Tailwind CSS.
+- [`lucide-react`](https://lucide.dev/) is included for beautiful and lightweight icons.
+- [`ShadCN`](https://ui.shadcn.com/) provides modern and customizable UI components.
+- All scripts are managed via `package.json`, ensuring a streamlined development experience.
 
-## Learn More
+## Contributing
+Feel free to contribute by submitting issues or pull requests.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+MIT License
