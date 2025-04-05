@@ -411,32 +411,34 @@ const HectocGame: React.FC = () => {
 
   return (
     <div className='flex flex-col items-center min-h-screen text-white w-full max-w-md lg:max-w-xl mx-auto px-3 sm:px-4'>
-      {/* Player scores - increased mobile size */}
-      <div className='w-full flex justify-between px-3 sm:px-4 mt-8 sm:mt-10'>
+      {/* Player scores - improved spacing */}
+      <div className='w-full flex justify-between px-3 sm:px-4 mt-8 sm:mt-10 mb-6'>
         <div className='flex flex-col items-center'>
           <div className='w-11 h-11 sm:w-12 sm:h-12 bg-white rounded-md'></div>
-          <div className='mt-1.5 text-sm sm:text-sm'>You</div>
+          <div className='mt-2 text-sm sm:text-sm'>You</div>
           <div className='text-sm text-gray-400'>12 XP</div>
-          <div className='mt-1.5 bg-gray-800 rounded-full w-6 h-6 flex items-center justify-center text-sm'>
+          <div className='mt-2 bg-gray-800 rounded-full w-6 h-6 flex items-center justify-center text-sm'>
             0
           </div>
         </div>
         <div className='flex flex-col items-center'>
           <div className='w-11 h-11 sm:w-12 sm:h-12 bg-white rounded-md'></div>
-          <div className='text-sm text-gray-400 text-right'>20 XP</div>
-          <div className='text-right text-sm sm:text-sm'>Ranjan</div>
-          <div className='mt-1.5 bg-gray-800 rounded-full w-6 h-6 flex items-center justify-center text-sm'>
+          <div className='mt-2 text-sm sm:text-sm'>DMC</div>
+          <div className='text-sm text-gray-400'>6 XP</div>
+          <div className='mt-2 bg-gray-800 rounded-full w-6 h-6 flex items-center justify-center text-sm'>
             0
           </div>
         </div>
       </div>
 
-      {/* Timer - increased mobile size */}
-      <div className='mt-2 sm:mt-2 relative'>
+      {/* Timer - consistent spacing */}
+      <div className='mb-6'>
         <div
-          className={`w-20 h-10 sm:w-16 sm:h-12 rounded-xl border ${timeLeft === 0 ? 'border-red-500' : 'border-teal-500'} flex items-center justify-center`}
+          className={`w-20 h-10 sm:w-16 sm:h-12 rounded-xl border ${
+            timeLeft === 0 ? 'border-red-500' : 'border-teal-500'
+          } flex items-center justify-center`}
         >
-          <span className='mr-1.5'>
+          <span className='mr-2'>
             <Timer color={timeLeft === 0 ? '#FF0000' : '#00EFCA'} />
           </span>
           <div
@@ -447,13 +449,13 @@ const HectocGame: React.FC = () => {
         </div>
       </div>
 
-      {/* Game board - increased mobile size */}
+      {/* Game board - improved spacing */}
       <div
-        className='relative w-full max-w-md mx-auto mt-4 sm:mt-4 border-t border-gray-800'
+        className='relative w-full max-w-md mx-auto border-t border-gray-800 pt-5'
         ref={gameAreaRef}
       >
-        {/* Centered horizontal cell layout - never wrap */}
-        <div className='flex flex-nowrap justify-center overflow-x-auto gap-2 sm:gap-3 mt-4 sm:mt-4 mb-4 px-4 py-2'>
+        {/* Centered horizontal cell layout with consistent spacing */}
+        <div className='flex flex-nowrap justify-center overflow-x-auto gap-2 sm:gap-3 mb-6 px-4 py-2'>
           {cells.map((cell, index) => (
             <div
               key={cell.id}
@@ -479,7 +481,7 @@ const HectocGame: React.FC = () => {
           ))}
         </div>
 
-        {/* Dragged item visual - larger for mobile */}
+        {/* Dragged item visual - preserved sizing */}
         {touchDragging && touchSourceCell && (
           <div
             className='fixed bg-green-800 rounded-md w-10 h-10 sm:w-10 sm:h-10 flex items-center justify-center pointer-events-none z-50 touch-dragging-visual'
@@ -507,21 +509,21 @@ const HectocGame: React.FC = () => {
           </div>
         )}
 
-        {/* Result area - centered and fixed width */}
-        <div className='mx-auto mt-4 sm:mt-4 w-[40%] max-w-xs h-14 sm:h-14 bg-gray-700 rounded-md flex items-center justify-center px-3'>
+        {/* Result area - improved spacing */}
+        <div className='mx-auto mb-4 w-[40%] max-w-xs h-14 sm:h-14 bg-gray-700 rounded-md flex items-center justify-center px-3'>
           <div className='text-lg sm:text-lg font-medium text-white truncate'>
             {message.includes('Current value:') ? message.replace('Current value:', '').trim() : ''}
           </div>
         </div>
 
-        {/* Instructions - centered text */}
-        <div className='text-center mt-3 text-sm sm:text-sm text-gray-300 px-3'>
+        {/* Instructions - improved spacing */}
+        <div className='text-center mb-8 text-sm sm:text-sm text-gray-300 px-3'>
           {!message.includes('Current value:') ? message : 'Drag the operations in the gaps'}
         </div>
       </div>
 
-      {/* Operation buttons - larger for mobile */}
-      <div className='flex flex-col items-center gap-3 sm:gap-3 mt-5 sm:mt-5 px-3 sm:px-4 w-full max-w-xs sm:max-w-sm'>
+      {/* Operation buttons - improved spacing */}
+      <div className='flex flex-col items-center gap-4 mb-8 px-3 sm:px-4 w-full max-w-xs sm:max-w-sm'>
         {/* First row */}
         <div className='flex justify-center gap-3 sm:gap-3 w-full'>
           <div
@@ -709,8 +711,8 @@ const HectocGame: React.FC = () => {
         </div>
       </div>
 
-      {/* Hint and Reset buttons - larger for mobile */}
-      <div className='flex justify-center gap-4 sm:gap-4 mt-8 sm:mt-10 w-full max-w-xs sm:max-w-sm'>
+      {/* Hint and Reset buttons - improved spacing */}
+      <div className='flex justify-center gap-5 w-full max-w-xs sm:max-w-sm mb-8'>
         <button
           className='flex items-center gap-2 bg-gray-800 text-white px-4 py-2.5 sm:py-2.5 rounded-full text-base sm:text-base'
           onClick={() => {
