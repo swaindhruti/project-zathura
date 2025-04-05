@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import RedisClient from "@/lib/redisClient";
-
+import prisma from "@/lib/prisma";
 export class HectocService {
     private redisClient: RedisClient;
 
@@ -126,6 +126,240 @@ export class HectocService {
         } catch (error) {
             console.error("Error retrieving solution by questionId:", error);
             return { error: "Failed to retrieve solution" };
+        }
+    }
+
+    async createHectocGame(
+        userId: string,
+        options: {
+            difficulty: string;
+            target?: number;
+            isDuel?: boolean;
+        }
+    ) {
+        try {
+            const { difficulty, target = 100, isDuel = false } = options;
+
+            // Validate difficulty
+            const allowedDifficulties = [
+                "easy",
+                "moderate",
+                "difficult",
+            ] as const;
+            const validatedDifficulty = allowedDifficulties.includes(
+                difficulty as any
+            )
+                ? (difficulty as "easy" | "moderate" | "difficult")
+                : "moderate";
+
+            // Generate puzzles for the game
+            const puzzles = this.generateHectocPuzzles(
+                5,
+                validatedDifficulty,
+                target,
+                6
+            );
+
+            if (!puzzles || puzzles.length === 0) {
+                throw new Error("Failed to generate puzzles for the game");
+            }
+
+            // Store the puzzles in Redis
+            await this.redisClient.storePuzzles(puzzles);
+
+            // Use Prisma client to create the game in the database
+
+            // Create transaction to ensure game and participant are created together
+            const game = await prisma.$transaction(async (tx) => {
+                // Create the game
+                const newGame = await tx.hectocGame.create({
+                    data: {
+                        difficulty: validatedDifficulty,
+                        target,
+                        isDuel,
+                        status: isDuel ? "WAITING" : "IN_PROGRESS",
+                        startedAt: isDuel ? null : new Date(),
+                        questions: puzzles.map((p) => ({
+                            qId: p.questionId,
+                            expression: p.digits.join(""),
+                            possibleSolution: p.solution,
+                        })),
+                    },
+                });
+
+                // Add the creator as a participant
+                await tx.gameParticipant.create({
+                    data: {
+                        gameId: newGame.id,
+                        userId: userId,
+                        isCreator: true,
+                        role: "PLAYER",
+                    },
+                });
+
+                return newGame;
+            });
+
+            return {
+                success: true,
+                game: {
+                    ...game,
+                    questions: puzzles.map((p) => ({
+                        questionId: p.questionId,
+                        digits: p.digits,
+                    })),
+                },
+            };
+        } catch (error) {
+            console.error("Error creating Hectoc game:", error);
+            return {
+                success: false,
+                error: "Failed to create game",
+            };
+        }
+    }
+
+    async saveGameResults(data: {
+        userId: string;
+        gameId: string;
+        results: Array<{
+            qId: string;
+            user_ans: string;
+            isCorrect: boolean;
+            timeToSolve: number;
+        }>;
+        totalScore: number;
+        totalTime: number;
+    }) {
+        try {
+            const { userId, gameId, results, totalScore, totalTime } = data;
+
+            // First, get the participant entry to obtain the participantId
+            const participant = await prisma.gameParticipant.findUnique({
+                where: {
+                    gameId_userId: {
+                        gameId,
+                        userId,
+                    },
+                },
+            });
+
+            if (!participant) {
+                throw new Error("User is not a participant in this game");
+            }
+
+            // Check if result already exists for this participant and game
+            const existingResult = await prisma.result.findUnique({
+                where: {
+                    participantId_gameId: {
+                        participantId: participant.id,
+                        gameId,
+                    },
+                },
+            });
+
+            if (existingResult) {
+                // Update existing result
+                const updatedResult = await prisma.result.update({
+                    where: {
+                        id: existingResult.id,
+                    },
+                    data: {
+                        results,
+                        totalScore,
+                        totalTime,
+                    },
+                });
+                return updatedResult;
+            } else {
+                // Create new result
+                const newResult = await prisma.result.create({
+                    data: {
+                        participantId: participant.id,
+                        gameId,
+                        userId,
+                        results,
+                        totalScore,
+                        totalTime,
+                    },
+                });
+
+                const allParticipants = await prisma.gameParticipant.count({
+                    where: { gameId },
+                });
+
+                const resultsSubmitted = await prisma.result.count({
+                    where: { gameId },
+                });
+
+                if (allParticipants === resultsSubmitted) {
+                    // Get highest score to determine winner
+                    const allResults = await prisma.result.findMany({
+                        where: { gameId },
+                    });
+
+                    let highestScore = -1;
+                    let fastestTime = Number.MAX_SAFE_INTEGER;
+                    let winnerId: string | null = null;
+
+                    allResults.forEach((result) => {
+                        if (
+                            result.totalScore > highestScore ||
+                            (result.totalScore === highestScore &&
+                                result.totalTime < fastestTime)
+                        ) {
+                            highestScore = result.totalScore;
+                            fastestTime = result.totalTime;
+                            winnerId = result.id;
+                        }
+                    });
+
+                    // Update winner status
+                    if (winnerId) {
+                        await prisma.result.update({
+                            where: { id: winnerId },
+                            data: { isWinner: true },
+                        });
+
+                        // Update user stats
+                        const winnerResult = allResults.find(
+                            (r) => r.id === winnerId
+                        );
+                        if (winnerResult) {
+                            await prisma.user.update({
+                                where: { id: winnerResult.userId },
+                                data: {
+                                    gamesWon: { increment: 1 },
+                                },
+                            });
+                        }
+                    }
+
+                    // Update all participants' gamesPlayed count
+                    for (const result of allResults) {
+                        await prisma.user.update({
+                            where: { id: result.userId },
+                            data: {
+                                gamesPlayed: { increment: 1 },
+                            },
+                        });
+                    }
+
+                    // Mark game as finished
+                    await prisma.hectocGame.update({
+                        where: { id: gameId },
+                        data: {
+                            status: "FINISHED",
+                            endedAt: new Date(),
+                        },
+                    });
+                }
+
+                return newResult;
+            }
+        } catch (error) {
+            console.error("Error saving game results:", error);
+            throw new Error("Failed to save game results");
         }
     }
 

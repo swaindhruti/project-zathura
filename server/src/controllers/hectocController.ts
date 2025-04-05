@@ -27,6 +27,13 @@ export const verifyPuzzleSolution = async (
     next: NextFunction
 ) => {
     try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({
+                valid: false,
+                reason: "Please Login to continue",
+            });
+        }
         const { digits, solution, target = 100 } = req.body;
 
         if (digits.length !== 6) {
@@ -61,6 +68,13 @@ export const getSolution = async (
     next: NextFunction
 ) => {
     try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({
+                valid: false,
+                reason: "Please Login to continue",
+            });
+        }
         const { questionId } = req.body;
         if (!questionId) {
             return res.status(400).json({
@@ -75,6 +89,53 @@ export const getSolution = async (
         res.status(500).json({
             valid: false,
             reason: "An error occurred while processing your request.",
+        });
+    }
+};
+
+export const saveScores = async (req: Request, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+        return res.status(401).json({
+            valid: false,
+            reason: "Please Login to continue",
+        });
+    }
+
+    try {
+        const { gameId, results, totalScore, totalTime } = req.body;
+
+        if (!gameId) {
+            return res.status(400).json({
+                valid: false,
+                reason: "Invalid request. Game ID is required.",
+            });
+        }
+
+        if (!results || !Array.isArray(results)) {
+            return res.status(400).json({
+                valid: false,
+                reason: "Invalid request. Results data is required.",
+            });
+        }
+
+        const savedResult = await hectocService.saveGameResults({
+            userId,
+            gameId,
+            results,
+            totalScore: totalScore || 0,
+            totalTime: totalTime || 0,
+        });
+
+        res.status(200).json({
+            success: true,
+            result: savedResult,
+        });
+    } catch (error) {
+        console.error("Error in saveScores:", error);
+        res.status(500).json({
+            valid: false,
+            reason: "An error occurred while saving scores.",
         });
     }
 };

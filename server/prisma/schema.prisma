@@ -7,6 +7,8 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+
+
 model User {
     id           String   @id @default(uuid())
     email        String   @unique
@@ -19,24 +21,18 @@ model User {
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt
 
-    // HectoClash related fields
-    rating       Int      @default(1200)
+    rating       Int      @default(100)
     gamesPlayed  Int      @default(0)
     gamesWon     Int      @default(0)
-
-    // Relations to HectoClash
-    hectocDuelsAsPlayerOne HectocDuel[] @relation("PlayerOne")
-    hectocDuelsAsPlayerTwo HectocDuel[] @relation("PlayerTwo")
-    hectocSolutions        HectocSolution[]
-    hectocSpectating       HectocSpectator[]
-    hectocChallenges       HectocChallenge[]
-
+    
     sentRequests     FriendRequest[] @relation("SentRequests")
     receivedRequests FriendRequest[] @relation("ReceivedRequests")
      
-     // Friendship relations
     friendsTo   Friendship[] @relation("UserFriends")
     friendsFrom Friendship[] @relation("FriendsUser")
+
+    gameParticipations GameParticipant[]
+    results            Result[]
 
     @@map("users")
 }
@@ -49,27 +45,25 @@ model FriendRequest {
      createdAt  DateTime         @default(now())
      updatedAt  DateTime         @updatedAt
  
-     // Relations
      sender   User @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
      receiver User @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
  
      @@unique([senderId, receiverId])
      @@map("friend_requests")
- }
+}
  
- model Friendship {
+model Friendship {
      id        String   @id @default(uuid())
      userId    String
      friendId  String
      createdAt DateTime @default(now())
  
-     // Relations
      user   User @relation("UserFriends", fields: [userId], references: [id], onDelete: Cascade)
      friend User @relation("FriendsUser", fields: [friendId], references: [id], onDelete: Cascade)
  
      @@unique([userId, friendId])
      @@map("friendships")
- }
+}
 
 enum Role {
     USER
@@ -80,102 +74,64 @@ enum FriendshipStatus {
      PENDING
      ACCEPTED
      REJECTED
- }
+}
 
-// HectoClash Models
+model HectocGame {
+    id          String           @id @default(uuid())
+    createdAt   DateTime         @default(now())
+    startedAt   DateTime?
+    endedAt     DateTime?
+    status      GameStatus       @default(WAITING)
+    
+    target      Int              @default(100)
+    difficulty  String           // easy, medium, hard, expert
+    isDuel      Boolean          @default(false)
+    
+    // Store the questions as JSON array
+    // [{qId:"", expression:"", possibleSolution:""}]
+    questions   Json?
+    
+    results     Result[]
+    
+    participants GameParticipant[]
 
-model HectocDuel {
-    id                String         @id @default(uuid())
-    createdAt         DateTime       @default(now())
-    startedAt         DateTime?
-    endedAt           DateTime?
-    status            HectocDuelStatus @default(WAITING)
+    @@map("hectoc_games")
+    @@index([status])
+}
+
+model Result {
+    id            String   @id @default(uuid())
+    createdAt     DateTime @default(now())
     
-    // Players
-    playerOneId       String
-    playerOne         User           @relation("PlayerOne", fields: [playerOneId], references: [id])
-    playerTwoId       String?
-    playerTwo         User?          @relation("PlayerTwo", fields: [playerTwoId], references: [id])
+    participantId String
+    gameId        String
     
-    // Game data
-    digits            Int[]          // The 6 digits for this puzzle
-    target            Int            @default(100)
-    difficulty        String         // easy, medium, hard, expert
+    // Results stored as JSON array:
+    // [{
+    //   qId: string,
+    //   user_ans: string/number,
+    //   isCorrect: boolean,
+    //   timeToSolve: number // milliseconds
+    // },...]
+    results       Json?
     
-    // Results
-    winnerId          String?
-    playerOneFinishedAt DateTime?
-    playerTwoFinishedAt DateTime?
+    totalScore    Int      @default(0)
+    totalTime     Int      @default(0)
+    isWinner      Boolean  @default(false)
     
     // Relations
-    spectators        HectocSpectator[]
-    solutions         HectocSolution[]
+    participant   GameParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+    game          HectocGame      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+    user          User            @relation(fields: [userId], references: [id])
+    userId        String
 
-    @@map("hectoc_duels")
-    @@index([playerOneId])
-    @@index([playerTwoId])
-    @@index([status])
+    @@unique([participantId, gameId])
+    @@map("results")
 }
 
-model HectocSolution {
-    id               String     @id @default(uuid())
-    createdAt        DateTime   @default(now())
-    
-    // User who submitted the solution
-    userId           String
-    user             User       @relation(fields: [userId], references: [id])
-    
-    // Duel this solution belongs to
-    duelId           String
-    duel             HectocDuel @relation(fields: [duelId], references: [id])
-    
-    // Solution data
-    expression       String     // The actual solution expression
-    isCorrect        Boolean
-    timeToSolve      Int        // Time in milliseconds
-    
-    @@map("hectoc_solutions")
-    @@index([userId])
-    @@index([duelId])
-}
 
-model HectocSpectator {
-    id               String     @id @default(uuid())
-    
-    // User who is spectating
-    userId           String
-    user             User       @relation(fields: [userId], references: [id])
-    
-    // Duel being spectated
-    duelId           String
-    duel             HectocDuel @relation(fields: [duelId], references: [id])
-    
-    joinedAt         DateTime   @default(now())
-    
-    @@map("hectoc_spectators")
-    @@unique([duelId, userId])
-}
 
-model HectocChallenge {
-    id               String     @id @default(uuid())
-    createdAt        DateTime   @default(now())
-    
-    // User who sent the challenge
-    challengerId     String
-    challenger       User       @relation(fields: [challengerId], references: [id])
-    
-    // Challenge configuration
-    difficulty       String?    // Specific difficulty or null for random
-    message          String?    
-    expiresAt        DateTime
-    status           HectocChallengeStatus @default(PENDING)
-    
-    @@map("hectoc_challenges")
-    @@index([challengerId])
-    @@index([status])
-}
-
-enum HectocDuelStatus {
+enum GameStatus {
     WAITING
     IN_PROGRESS
     FINISHED
@@ -187,4 +143,27 @@ enum HectocChallengeStatus {
     ACCEPTED
     REJECTED
     EXPIRED
+}
+
+model GameParticipant {
+    id         String          @id @default(uuid())
+    gameId     String
+    userId     String
+    role       ParticipantRole @default(PLAYER)
+    isCreator  Boolean         @default(false)
+    joinedAt   DateTime        @default(now())
+    
+    // Relations
+    game       HectocGame      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+    user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+    
+    // Relation to results
+    results    Result[]
+
+    @@unique([gameId, userId])
+    @@map("game_participants")
+}
+
+enum ParticipantRole {
+    PLAYER
 }
