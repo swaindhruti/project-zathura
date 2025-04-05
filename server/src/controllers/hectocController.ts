@@ -9,6 +9,13 @@ export const getPuzzle = async (
     next: NextFunction
 ) => {
     try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return {
+                valid: false,
+                reason: "Please Login to continue",
+            };
+        }
         const { difficulty } = req.body;
 
         const puzzle = await hectocService.generatePuzzle(difficulty);

@@ -17,7 +17,7 @@ export class HectocService {
             : "moderate";
 
         const puzzles = this.generateHectocPuzzles(
-            5,
+            2,
             validatedDifficulty,
             100,
             6
