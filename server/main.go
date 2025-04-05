@@ -32,5 +32,5 @@ func main() {
 }
 
 func setupRoutes(app *fiber.App) {
-    app.Get("/health", api.HealthCheck)
+    app.Get("/",api.HealthCheck)
 }
