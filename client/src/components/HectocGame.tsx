@@ -325,61 +325,61 @@ const HectocGame: React.FC = () => {
   // Add this function for mobile touch handling
   const handleTouchStart = (e: React.TouchEvent, cell: Cell, index: number) => {
     if (!cell.draggable) return;
-    
+
     setTouchDragging(true);
     setTouchSourceIndex(index);
     setTouchSourceCell(cell);
     setTouchPosition({
       x: e.touches[0].clientX,
-      y: e.touches[0].clientY
+      y: e.touches[0].clientY,
     });
-    
+
     // Create visual feedback
     const element = e.currentTarget;
     element.classList.add('touch-dragging');
   };
-  
+
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!touchDragging) return;
-    
+
     e.preventDefault(); // Prevent scrolling while dragging
-    
+
     setTouchPosition({
       x: e.touches[0].clientX,
-      y: e.touches[0].clientY
+      y: e.touches[0].clientY,
     });
-    
+
     // Find drop target element under the touch point
     const elementsAtPoint = document.elementsFromPoint(touchPosition.x, touchPosition.y);
-    const dropTargetEl = elementsAtPoint.find(el => 
-      el.classList.contains('operation-slot') || el.classList.contains('digit-cell')
+    const dropTargetEl = elementsAtPoint.find(
+      (el) => el.classList.contains('operation-slot') || el.classList.contains('digit-cell')
     );
-    
+
     // Highlight potential drop target
-    document.querySelectorAll('.highlight-drop-target').forEach(el => 
-      el.classList.remove('highlight-drop-target')
-    );
-    
+    document
+      .querySelectorAll('.highlight-drop-target')
+      .forEach((el) => el.classList.remove('highlight-drop-target'));
+
     if (dropTargetEl) {
       dropTargetEl.classList.add('highlight-drop-target');
     }
   };
-  
+
   const handleTouchEnd = (e: React.TouchEvent) => {
     if (!touchDragging) return;
-    
+
     const element = e.currentTarget;
     element.classList.remove('touch-dragging');
-    
+
     // Find drop target element under the final touch point
     const elementsAtPoint = document.elementsFromPoint(touchPosition.x, touchPosition.y);
-    const dropTargetEl = elementsAtPoint.find(el => 
-      el.classList.contains('operation-slot') || el.classList.contains('digit-cell')
+    const dropTargetEl = elementsAtPoint.find(
+      (el) => el.classList.contains('operation-slot') || el.classList.contains('digit-cell')
     );
-    
+
     if (dropTargetEl && touchSourceCell) {
       const targetIndex = parseInt(dropTargetEl.getAttribute('data-index') || '-1');
-      
+
       if (targetIndex !== -1) {
         if (cells[targetIndex].type === 'digit') {
           const operationIndex =
@@ -397,20 +397,20 @@ const HectocGame: React.FC = () => {
         }
       }
     }
-    
+
     // Clear states
     setTouchDragging(false);
     setTouchSourceIndex(-1);
     setTouchSourceCell(null);
-    
+
     // Remove all highlights
-    document.querySelectorAll('.highlight-drop-target').forEach(el => 
-      el.classList.remove('highlight-drop-target')
-    );
+    document
+      .querySelectorAll('.highlight-drop-target')
+      .forEach((el) => el.classList.remove('highlight-drop-target'));
   };
 
   return (
-    <div className='flex flex-col items-center min-h-screen bg-black text-white max-w-md mx-auto'>
+    <div className='flex flex-col items-center min-h-screen text-white max-w-md mx-auto'>
       {/* Player scores - simplified for mobile */}
       <div className='w-full flex justify-between px-2 mt-10'>
         <div className='flex flex-col items-center'>
@@ -441,17 +441,17 @@ const HectocGame: React.FC = () => {
       {/* Game board */}
       <div className='relative w-full mt-3 border-t border-gray-800' ref={gameAreaRef}>
         {/* Replace the static grid with the dynamic cells from state */}
-        <div className='flex flex-wrap justify-center gap-1 mt-4 px-2'>
+        <div className='flex flex-wrap justify-center gap-1 mt-4 mb-3 px-2'>
           {cells.map((cell, index) => (
             <div
               key={cell.id}
               data-index={index}
-              className={`flex items-center justify-center h-9 w-9 ${
+              className={`flex items-center justify-center h-5 w-5 ${
                 cell.type === 'digit'
-                  ? 'text-white text-lg font-medium digit-cell'
+                  ? 'text-white text-xl font-medium digit-cell'
                   : cell.value
                     ? 'bg-green-800 rounded-md'
-                    : 'bg-gray-800 border border-dashed border-gray-500 rounded-md operation-slot'
+                    : 'bg-gray-600  rounded-full operation-slot'
               }`}
               draggable={cell.draggable}
               onDragStart={(e) => cell.draggable && handleDragStart(e, cell, index)}
@@ -469,26 +469,34 @@ const HectocGame: React.FC = () => {
 
         {/* Dragged item visual representation for mobile */}
         {touchDragging && touchSourceCell && (
-          <div 
-            className="absolute bg-green-800 rounded-md w-9 h-9 flex items-center justify-center pointer-events-none z-10 touch-dragging-visual"
+          <div
+            className='absolute bg-green-800 rounded-md w-9 h-9 flex items-center justify-center pointer-events-none z-10 touch-dragging-visual'
             style={{
-              left: `${touchPosition.x - 18}px`,
-              top: `${touchPosition.y - 18}px`
+              left: `${touchPosition.x - 5}px`,
+              top: `${touchPosition.y - 5}px`,
             }}
           >
-            {touchSourceCell.value || 
-             (touchSourceCell.id.includes('plus') ? '+' : 
-              touchSourceCell.id.includes('minus') ? '-' : 
-              touchSourceCell.id.includes('multiply') ? '×' : 
-              touchSourceCell.id.includes('divide') ? '/' :
-              touchSourceCell.id.includes('left-bracket') ? '(' :
-              touchSourceCell.id.includes('right-bracket') ? ')' :
-              touchSourceCell.id.includes('exponent') ? '^' : '')}
+            {touchSourceCell.value ||
+              (touchSourceCell.id.includes('plus')
+                ? '+'
+                : touchSourceCell.id.includes('minus')
+                  ? '-'
+                  : touchSourceCell.id.includes('multiply')
+                    ? '×'
+                    : touchSourceCell.id.includes('divide')
+                      ? '/'
+                      : touchSourceCell.id.includes('left-bracket')
+                        ? '('
+                        : touchSourceCell.id.includes('right-bracket')
+                          ? ')'
+                          : touchSourceCell.id.includes('exponent')
+                            ? '^'
+                            : '')}
           </div>
         )}
 
         {/* Result area */}
-        <div className='mx-auto mt-4 w-full max-w-xs h-12 bg-gray-700 rounded-md flex items-center justify-center px-2'>
+        <div className='mx-auto mt-4 w-[50%] max-w-xs h-12 bg-gray-700 rounded-md flex items-center justify-center px-2'>
           <div className='text-lg font-medium text-white truncate'>
             {message.includes('Current value:') ? message : ''}
           </div>
@@ -501,189 +509,196 @@ const HectocGame: React.FC = () => {
       </div>
 
       {/* Operation buttons - more compact layout */}
-      <div className='grid grid-cols-4 gap-2 mt-4 px-4 w-full max-w-xs'>
-        <div
-          className='w-12 h-12 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
-          draggable
-          data-op="+"
-          onDragStart={(e) =>
-            handleDragStart(
-              e,
-              { type: 'operation', value: '+', id: 'op-plus', draggable: true },
-              -1
-            )
-          }
-          onDragEnd={handleDragEnd}
-          onTouchStart={(e) => 
-            handleTouchStart(
-              e,
-              { type: 'operation', value: '+', id: 'op-plus', draggable: true },
-              -1
-            )
-          }
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-        >
-          <Plus className='text-green-400' />
+      <div className='flex flex-col items-center gap-2 mt-4 px-4 w-full max-w-xs'>
+        {/* First row - 3 elements */}
+        <div className='flex justify-center gap-2 w-full'>
+          <div
+            className='w-12 h-12 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
+            draggable
+            data-op='+'
+            onDragStart={(e) =>
+              handleDragStart(
+                e,
+                { type: 'operation', value: '+', id: 'op-plus', draggable: true },
+                -1
+              )
+            }
+            onDragEnd={handleDragEnd}
+            onTouchStart={(e) =>
+              handleTouchStart(
+                e,
+                { type: 'operation', value: '+', id: 'op-plus', draggable: true },
+                -1
+              )
+            }
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <Plus className='text-green-400' />
+          </div>
+          <div
+            className='w-12 h-12 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
+            draggable
+            data-op='-'
+            onDragStart={(e) =>
+              handleDragStart(
+                e,
+                { type: 'operation', value: '-', id: 'op-minus', draggable: true },
+                -1
+              )
+            }
+            onDragEnd={handleDragEnd}
+            onTouchStart={(e) =>
+              handleTouchStart(
+                e,
+                { type: 'operation', value: '-', id: 'op-minus', draggable: true },
+                -1
+              )
+            }
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <Minus className='text-green-400' />
+          </div>
+          <div
+            className='w-12 h-12 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
+            draggable
+            data-op='*'
+            onDragStart={(e) =>
+              handleDragStart(
+                e,
+                { type: 'operation', value: '*', id: 'op-multiply', draggable: true },
+                -1
+              )
+            }
+            onDragEnd={handleDragEnd}
+            onTouchStart={(e) =>
+              handleTouchStart(
+                e,
+                { type: 'operation', value: '*', id: 'op-multiply', draggable: true },
+                -1
+              )
+            }
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <X className='text-green-400' />
+          </div>
         </div>
-        <div
-          className='w-12 h-12 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
-          draggable
-          data-op="-"
-          onDragStart={(e) =>
-            handleDragStart(
-              e,
-              { type: 'operation', value: '-', id: 'op-minus', draggable: true },
-              -1
-            )
-          }
-          onDragEnd={handleDragEnd}
-          onTouchStart={(e) => 
-            handleTouchStart(
-              e,
-              { type: 'operation', value: '-', id: 'op-minus', draggable: true },
-              -1
-            )
-          }
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-        >
-          <Minus className='text-green-400' />
-        </div>
-        <div
-          className='w-12 h-12 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
-          draggable
-          data-op="*"
-          onDragStart={(e) =>
-            handleDragStart(
-              e,
-              { type: 'operation', value: '*', id: 'op-multiply', draggable: true },
-              -1
-            )
-          }
-          onDragEnd={handleDragEnd}
-          onTouchStart={(e) => 
-            handleTouchStart(
-              e,
-              { type: 'operation', value: '*', id: 'op-multiply', draggable: true },
-              -1
-            )
-          }
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-        >
-          <X className='text-green-400' />
-        </div>
-        <div
-          className='w-12 h-12 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
-          draggable
-          data-op="/"
-          onDragStart={(e) =>
-            handleDragStart(
-              e,
-              { type: 'operation', value: '/', id: 'op-divide', draggable: true },
-              -1
-            )
-          }
-          onDragEnd={handleDragEnd}
-          onTouchStart={(e) => 
-            handleTouchStart(
-              e,
-              { type: 'operation', value: '/', id: 'op-divide', draggable: true },
-              -1
-            )
-          }
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-        >
-          <span className='text-green-400 text-xl'>/</span>
-        </div>
-      </div>
 
-      {/* Parentheses and other buttons */}
-      <div className='grid grid-cols-4 gap-2 mt-2 px-4 w-full max-w-xs'>
-        <div
-          className='w-12 h-12 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
-          draggable
-          data-op="("
-          onDragStart={(e) =>
-            handleDragStart(
-              e,
-              { type: 'operation', value: '(', id: 'op-left-bracket', draggable: true },
-              -1
-            )
-          }
-          onDragEnd={handleDragEnd}
-          onTouchStart={(e) => 
-            handleTouchStart(
-              e,
-              { type: 'operation', value: '(', id: 'op-left-bracket', draggable: true },
-              -1
-            )
-          }
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-        >
-          <span className='text-green-400 text-xl'>(</span>
+        {/* Second row - 3 elements */}
+        <div className='flex justify-center gap-2 w-full'>
+          <div
+            className='w-12 h-12 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
+            draggable
+            data-op='/'
+            onDragStart={(e) =>
+              handleDragStart(
+                e,
+                { type: 'operation', value: '/', id: 'op-divide', draggable: true },
+                -1
+              )
+            }
+            onDragEnd={handleDragEnd}
+            onTouchStart={(e) =>
+              handleTouchStart(
+                e,
+                { type: 'operation', value: '/', id: 'op-divide', draggable: true },
+                -1
+              )
+            }
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <span className='text-green-400 text-xl'>/</span>
+          </div>
+          <div
+            className='w-12 h-12 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
+            draggable
+            data-op='('
+            onDragStart={(e) =>
+              handleDragStart(
+                e,
+                { type: 'operation', value: '(', id: 'op-left-bracket', draggable: true },
+                -1
+              )
+            }
+            onDragEnd={handleDragEnd}
+            onTouchStart={(e) =>
+              handleTouchStart(
+                e,
+                { type: 'operation', value: '(', id: 'op-left-bracket', draggable: true },
+                -1
+              )
+            }
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <span className='text-green-400 text-xl'>(</span>
+          </div>
+          <div
+            className='w-12 h-12 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
+            draggable
+            data-op=')'
+            onDragStart={(e) =>
+              handleDragStart(
+                e,
+                { type: 'operation', value: ')', id: 'op-right-bracket', draggable: true },
+                -1
+              )
+            }
+            onDragEnd={handleDragEnd}
+            onTouchStart={(e) =>
+              handleTouchStart(
+                e,
+                { type: 'operation', value: ')', id: 'op-right-bracket', draggable: true },
+                -1
+              )
+            }
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <span className='text-green-400 text-xl'>)</span>
+          </div>
         </div>
-        <div
-          className='w-12 h-12 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
-          draggable
-          data-op=")"
-          onDragStart={(e) =>
-            handleDragStart(
-              e,
-              { type: 'operation', value: ')', id: 'op-right-bracket', draggable: true },
-              -1
-            )
-          }
-          onDragEnd={handleDragEnd}
-          onTouchStart={(e) => 
-            handleTouchStart(
-              e,
-              { type: 'operation', value: ')', id: 'op-right-bracket', draggable: true },
-              -1
-            )
-          }
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-        >
-          <span className='text-green-400 text-xl'>)</span>
-        </div>
-        <div
-          className='w-12 h-12 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
-          draggable
-          data-op="^"
-          onDragStart={(e) =>
-            handleDragStart(
-              e,
-              { type: 'operation', value: '^', id: 'op-exponent', draggable: true },
-              -1
-            )
-          }
-          onDragEnd={handleDragEnd}
-          onTouchStart={(e) => 
-            handleTouchStart(
-              e,
-              { type: 'operation', value: '^', id: 'op-exponent', draggable: true },
-              -1
-            )
-          }
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-        >
-          <span className='text-green-400 text-xl'>^</span>
-        </div>
-        <div
-          className='w-12 h-12 bg-green-900 rounded-full flex items-center justify-center cursor-pointer'
-          onClick={undoMove}
-        >
-          <span className='text-green-400 text-sm'>Undo</span>
+
+        {/* Third row - 2 elements */}
+        <div className='flex justify-center gap-2 w-full'>
+          <div
+            className='w-12 h-12 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
+            draggable
+            data-op='^'
+            onDragStart={(e) =>
+              handleDragStart(
+                e,
+                { type: 'operation', value: '^', id: 'op-exponent', draggable: true },
+                -1
+              )
+            }
+            onDragEnd={handleDragEnd}
+            onTouchStart={(e) =>
+              handleTouchStart(
+                e,
+                { type: 'operation', value: '^', id: 'op-exponent', draggable: true },
+                -1
+              )
+            }
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <span className='text-green-400 text-xl'>^</span>
+          </div>
+          <div
+            className='w-20 h-12 bg-green-900 rounded-xl flex items-center justify-center cursor-pointer'
+            onClick={undoMove}
+          >
+            <span className='text-green-400 text-sm'>Undo</span>
+          </div>
         </div>
       </div>
 
       {/* Hint and Reset buttons */}
-      <div className='flex justify-center gap-4 mt-4 w-full max-w-xs'>
+      <div className='flex justify-center gap-4 mt-10 w-full max-w-xs'>
         <button
           className='flex items-center gap-1 bg-gray-800 text-white px-3 py-2 rounded-full text-sm'
           onClick={() => {
