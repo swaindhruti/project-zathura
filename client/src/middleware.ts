@@ -6,8 +6,9 @@ export const middleware = async (request: {
   url: string | URL | undefined;
 }) => {
   const session = await auth();
+  console.log(session);
   const { pathname } = request.nextUrl;
-  if (pathname.startsWith('/dashbord')) {
+  if (pathname.startsWith('/dashboard')) {
     if (!session || !session.user) {
       return NextResponse.redirect(new URL('/login', request.url));
     }

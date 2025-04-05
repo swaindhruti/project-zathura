@@ -21,6 +21,7 @@ const Dashboard = () => {
 
       <div className='flex flex-col gap-3 w-full'>
         <GameModeCard
+          link='multiplayer'
           title='MULTIPLAYER'
           subtitle='Quick-Duel Match'
           className='multiplayer-card'
@@ -42,6 +43,7 @@ const Dashboard = () => {
         />
 
         <GameModeCard
+          link='tournament'
           title='TOURNAMENT'
           subtitle='Quick-Duel Match'
           className='tournament-card'
@@ -70,6 +72,7 @@ const Dashboard = () => {
 
         <div className='grid grid-cols-2 gap-2'>
           <GameModeCard
+            link='dual'
             title='VS FRIENDS'
             subtitle='Quick-Duel Match'
             className='friends-card'
@@ -82,6 +85,7 @@ const Dashboard = () => {
           />
 
           <GameModeCard
+            link='/dashboard/solo'
             title='SOLO'
             subtitle='Training Ground'
             className='solo-card'

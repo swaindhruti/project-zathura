@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from 'sonner';
 import { inter, air, satoshi } from './fonts';
+import { SessionProvider } from 'next-auth/react';
 
 export const metadata: Metadata = {
   title: 'HectoClash',
@@ -16,8 +17,10 @@ export default function RootLayout({
   return (
     <html lang='en'>
       <body className={`${inter.variable} ${air.variable} ${satoshi.variable} antialiased`}>
-        <Toaster />
-        {children}
+        <SessionProvider>
+          <Toaster />
+          {children}
+        </SessionProvider>
       </body>
     </html>
   );
