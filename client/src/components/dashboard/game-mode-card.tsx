@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 interface GameModeTagProps {
   icon: React.ReactNode;
@@ -23,11 +24,19 @@ interface GameModeCardProps {
     text: string;
   }>;
   icon?: React.ReactNode;
+  link: string;
 }
 
-const GameModeCard: React.FC<GameModeCardProps> = ({ title, subtitle, className, tags, icon }) => {
+const GameModeCard: React.FC<GameModeCardProps> = ({
+  title,
+  subtitle,
+  className,
+  tags,
+  icon,
+  link,
+}) => {
   return (
-    <div className={`game-mode-card ${className} relative overflow-hidden`}>
+    <Link href={link} className={`game-mode-card ${className} relative overflow-hidden`}>
       <div className='flex justify-between items-start'>
         <div>
           <h3 className='text-xl font-bold mb-1 font-air'>{title}</h3>
@@ -43,7 +52,7 @@ const GameModeCard: React.FC<GameModeCardProps> = ({ title, subtitle, className,
       {icon && (
         <div className='absolute top-4 right-4 opacity-30 pointer-events-none z-0'>{icon}</div>
       )}
-    </div>
+    </Link>
   );
 };
 
