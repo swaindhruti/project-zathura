@@ -1,23 +1,21 @@
 :root {
-  --primary: #0a0;
-  --primary-dark: #080;
-  --secondary: #0c0;
-  --accent: #6f6;
-  --danger: #f00;
-  --danger-dark: #c00;
-  --success: #0f8;
-  --warning: #fa0;
-  --light: #eee;
-  --dark: #111;
-  --bg-dark: #121212;
-  --bg-darker: #0a0a0a;
-  --bg-medium: #1e1e1e;
-  --text-green: #3f3;
-  --text-light: #efe;
-  --border-radius: 8px;
-  --shadow-sm: 0 2px 4px rgba(0, 255, 0, 0.1);
-  --shadow-md: 0 4px 8px rgba(0, 255, 0, 0.2);
-  --glow: 0 0 8px rgba(0, 255, 0, 0.5);
+  --primary: #4a4a4a;
+  --primary-dark: #333333;
+  --secondary: #666666;
+  --accent: #8c8c8c;
+  --danger: #e54d4d;
+  --danger-dark: #c13c3c;
+  --success: #5db75d;
+  --warning: #f0ad4e;
+  --light: #f2f2f2;
+  --dark: #222222;
+  --bg-dark: #1a1a1a;
+  --bg-medium: #2a2a2a;
+  --text-main: #e0e0e0;
+  --text-secondary: #b0b0b0;
+  --border-radius: 6px;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 3px 6px rgba(0, 0, 0, 0.3);
   --transition: all 0.2s ease;
 }
 
@@ -25,20 +23,16 @@ body {
   background-color: var(--bg-dark);
   margin: 0;
   padding: 0;
-  color: var(--text-light);
+  color: var(--text-main);
 }
 
 .hectoc-game {
-  font-family:
-    'SF Pro Display',
-    -apple-system,
-    BlinkMacSystemFont,
-    sans-serif;
-  max-width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  max-width: 600px;
+  margin: 0 auto;
   padding: 1rem;
-  color: var(--text-light);
-  line-height: 1.6;
-  background: var(--bg-dark);
+  color: var(--text-main);
+  line-height: 1.5;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -52,17 +46,15 @@ body {
 }
 
 .game-title {
-  font-size: 2rem;
+  font-size: 1.8rem;
   margin-bottom: 0.5rem;
-  color: var(--text-green);
-  font-weight: 700;
-  letter-spacing: -0.5px;
+  color: var(--text-main);
+  font-weight: 600;
   text-align: center;
-  text-shadow: var(--glow);
 }
 
 .game-subtitle {
-  color: var(--text-light);
+  color: var(--text-secondary);
   text-align: center;
   margin-bottom: 1.5rem;
   font-size: 1rem;
@@ -77,8 +69,6 @@ body {
   background-color: var(--bg-medium);
   border-radius: var(--border-radius);
   box-shadow: var(--shadow-sm);
-  transition: var(--transition);
-  position: relative;
   border: 1px solid var(--primary);
   overflow-x: auto;
 }
@@ -87,72 +77,52 @@ body {
   font-size: 1rem;
   font-weight: 600;
   margin-bottom: 1rem;
-  color: var(--text-green);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: var(--text-main);
   text-align: center;
 }
 
 .operations-container {
   display: flex;
-  justify-content: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  flex-wrap: nowrap;
   gap: 10px;
   padding: 10px;
   justify-content: center;
 }
 
 .operation-tile {
-  width: 3rem;
-  height: 3rem;
-  background-color: var(--bg-darker);
-  color: var(--text-green);
+  width: 40px;
+  height: 40px;
+  background: var(--primary);
+  border-radius: 4px;
+  color: var(--light);
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--border-radius);
   cursor: grab;
-  font-size: 1.5rem;
+  font-size: 18px;
   font-weight: 600;
   box-shadow: var(--shadow-sm);
   transition: var(--transition);
   user-select: none;
-  border: 1px solid var(--primary);
 }
 
 .operation-tile:hover,
 .operation-tile:active {
   background-color: var(--primary-dark);
-  color: var(--light);
   transform: translateY(-2px);
-  box-shadow: var(--glow);
 }
 
 /* Game Board */
 .game-board {
   display: flex;
-  justify-content: center;
-  align-items: center;
   gap: 0.25rem;
   margin: 1.5rem 0;
-  flex-wrap: wrap;
-  min-height: 4rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
   width: 100%;
   max-width: 500px;
-  padding: 1rem;
-  background-color: var(--bg-medium);
-  border-radius: var(--border-radius);
-  border: 1px solid var(--primary);
-  flex-wrap: nowrap; /* Prevent wrapping */
-  overflow-x: auto; /* Allow horizontal scrolling if needed */
-  width: 100%;
   padding: 10px 0;
   align-items: center;
-  justify-content: flex-start;
-  min-height: 80px; /* Ensure consistent height */
-  margin: 20px 0;
+  min-height: 60px;
 }
 
 .cell {
@@ -162,63 +132,58 @@ body {
   font-size: 1.5rem;
   font-weight: 600;
   transition: var(--transition);
-  position: relative;
   min-width: 40px;
   height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0; /* Prevent cells from shrinking */
-  font-size: clamp(16px, 4vw, 24px); /* Responsive font size */
+  flex-shrink: 0;
+  margin: 0 2px;
 }
 
 .cell.digit {
-  color: var(--text-light);
+  color: var(--text-main);
   padding: 0 0.25rem;
   min-width: 1.5rem;
+  font-weight: bold;
 }
 
 .cell.operation {
   width: 2.8rem;
   height: 2.8rem;
-  color: var(--text-green);
+  color: var(--text-secondary);
   cursor: grab;
-  border-radius: 50%;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 255, 0, 0.1);
-  transition: all 0.2s ease;
+  background: transparent;
 }
 
 .cell.operation.has-value {
-  background: var(--primary-dark);
+  background: var(--primary);
   color: var(--light);
-  box-shadow: var(--glow);
+  box-shadow: var(--shadow-sm);
 }
 
 .cell.operation.empty::after {
   content: '□';
-  color: rgba(0, 255, 0, 0.3);
-  font-size: 1.5rem;
+  color: var(--text-secondary);
+  border-bottom: 1px dashed var(--text-secondary);
 }
 
 .cell.drop-target {
-  background: rgba(0, 255, 0, 0.3);
-  transform: scale(1.05);
+  background-color: rgba(128, 128, 128, 0.2);
+  border-radius: 4px;
 }
 
 /* Messages & Feedback */
 .game-message {
   margin: 1rem 0;
-  font-size: 1.1rem;
+  font-size: 1rem;
   min-height: 1.5rem;
   padding: 0.75rem;
   border-radius: var(--border-radius);
   background: var(--bg-medium);
   text-align: center;
-  font-weight: 500;
-  color: var(--text-green);
+  color: var(--text-main);
   width: 100%;
   max-width: 500px;
   border: 1px solid var(--primary);
@@ -238,20 +203,17 @@ body {
 .button {
   padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 100px;
+  border-radius: 4px;
   cursor: pointer;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 500;
   transition: var(--transition);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+  background-color: var(--primary);
+  color: var(--light);
 }
 
 .button:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  background-color: var(--primary-dark);
 }
 
 .button:active {
@@ -260,7 +222,6 @@ body {
 
 .reset-button {
   background-color: var(--danger);
-  color: var(--light);
 }
 
 .reset-button:hover {
@@ -268,9 +229,7 @@ body {
 }
 
 .undo-button {
-  background-color: var(--bg-medium);
-  color: var(--text-green);
-  border: 1px solid var(--primary);
+  background-color: var(--primary);
 }
 
 .undo-button:not(:disabled):hover {
@@ -290,10 +249,6 @@ body {
   margin: 1.5rem 0;
   justify-content: center;
   flex-wrap: wrap;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
 }
 
 /* Rules Section */
@@ -303,7 +258,6 @@ body {
   background: var(--bg-medium);
   padding: 1rem;
   border-radius: var(--border-radius);
-  box-shadow: var(--shadow-sm);
   border: 1px solid var(--primary);
   width: 100%;
   max-width: 500px;
@@ -312,7 +266,7 @@ body {
 .rules-title {
   font-size: 1.25rem;
   margin-bottom: 1rem;
-  color: var(--text-green);
+  color: var(--text-main);
   font-weight: 600;
 }
 
@@ -323,7 +277,7 @@ body {
 
 .rules-list li {
   margin-bottom: 0.75rem;
-  color: var(--text-light);
+  color: var(--text-secondary);
 }
 
 /* Drag and Drop States */
@@ -335,8 +289,7 @@ body {
 .drop-hint {
   margin-top: 1rem;
   font-size: 0.875rem;
-  color: var(--text-light);
-  font-style: italic;
+  color: var(--text-secondary);
   text-align: center;
 }
 
@@ -344,7 +297,7 @@ body {
   display: none;
   text-align: center;
   font-size: 0.8rem;
-  color: #666;
+  color: var(--text-secondary);
   margin-bottom: 10px;
 }
 
