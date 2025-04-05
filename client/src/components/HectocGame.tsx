@@ -464,7 +464,7 @@ const HectocGame: React.FC = () => {
                 cell.type === 'digit'
                   ? 'text-white font-medium digit-cell'
                   : cell.value
-                    ? 'bg-green-800 rounded-md'
+                    ? 'bg-gray-700 text-[#90FE95] rounded-md'
                     : 'bg-gray-600 rounded-full operation-slot'
               }`}
               draggable={cell.draggable}
