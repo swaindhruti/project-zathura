@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
-import { Plus, Minus, X, Lightbulb } from 'lucide-react';
+import { Plus, Minus, X, Lightbulb, Timer } from 'lucide-react';
 import { Wifi, Bluetooth } from 'lucide-react';
 import './HectocGame.css';
 
@@ -273,7 +273,7 @@ const HectocGame: React.FC = () => {
       if (Math.abs(result - 100) < 0.0001) {
         setMessage('Congratulations! You solved it!');
       } else {
-        setMessage(`Current value: ${result}. `);
+        setMessage(`Current value: ${result} `);
       }
     } catch {
       setMessage('Invalid expression. Keep trying!');
@@ -410,48 +410,60 @@ const HectocGame: React.FC = () => {
   };
 
   return (
-    <div className='flex flex-col items-center min-h-screen text-white max-w-md mx-auto'>
-      {/* Player scores - simplified for mobile */}
-      <div className='w-full flex justify-between px-2 mt-10'>
+    <div className='flex flex-col items-center min-h-screen text-white w-full max-w-md lg:max-w-xl mx-auto px-3 sm:px-4'>
+      {/* Player scores - increased mobile size */}
+      <div className='w-full flex justify-between px-3 sm:px-4 mt-8 sm:mt-10'>
         <div className='flex flex-col items-center'>
-          <div className='w-10 h-10 bg-white rounded-md'></div>
-          <div className='mt-1 text-sm'>You</div>
-          <div className='text-xs text-gray-400'>12 XP</div>
-          <div className='mt-1 bg-gray-800 rounded-full w-5 h-5 flex items-center justify-center text-xs'>
+          <div className='w-11 h-11 sm:w-12 sm:h-12 bg-white rounded-md'></div>
+          <div className='mt-1.5 text-sm sm:text-sm'>You</div>
+          <div className='text-sm text-gray-400'>12 XP</div>
+          <div className='mt-1.5 bg-gray-800 rounded-full w-6 h-6 flex items-center justify-center text-sm'>
             0
           </div>
         </div>
         <div className='flex flex-col items-center'>
-          <div className='w-10 h-10 bg-white rounded-md'></div>
-          <div className='text-xs text-gray-400 text-right'>20 XP</div>
-          <div className='text-right text-sm'>Ranjan</div>
-          <div className='mt-1 bg-gray-800 rounded-full w-5 h-5 flex items-center justify-center text-xs'>
+          <div className='w-11 h-11 sm:w-12 sm:h-12 bg-white rounded-md'></div>
+          <div className='text-sm text-gray-400 text-right'>20 XP</div>
+          <div className='text-right text-sm sm:text-sm'>Ranjan</div>
+          <div className='mt-1.5 bg-gray-800 rounded-full w-6 h-6 flex items-center justify-center text-sm'>
             0
           </div>
         </div>
       </div>
 
-      {/* Timer */}
-      <div className='mt-4 relative'>
-        <div className='w-14 h-14 rounded-xl border border-teal-500 flex items-center justify-center'>
-          <div className='text-teal-500 text-sm'>0:{timeLeft.toString().padStart(2, '0')}</div>
+      {/* Timer - increased mobile size */}
+      <div className='mt-2 sm:mt-2 relative'>
+        <div
+          className={`w-20 h-10 sm:w-16 sm:h-12 rounded-xl border ${timeLeft === 0 ? 'border-red-500' : 'border-teal-500'} flex items-center justify-center`}
+        >
+          <span className='mr-1.5'>
+            <Timer color={timeLeft === 0 ? '#FF0000' : '#00EFCA'} />
+          </span>
+          <div
+            className={`${timeLeft === 0 ? 'text-red-500' : 'text-teal-500'} text-base sm:text-base`}
+          >
+            0:{timeLeft.toString().padStart(2, '0')}
+          </div>
         </div>
       </div>
 
-      {/* Game board */}
-      <div className='relative w-full mt-3 border-t border-gray-800' ref={gameAreaRef}>
-        {/* Replace the static grid with the dynamic cells from state */}
-        <div className='flex flex-wrap justify-center gap-1 mt-4 mb-3 px-2'>
+      {/* Game board - increased mobile size */}
+      <div
+        className='relative w-full max-w-md mx-auto mt-4 sm:mt-4 border-t border-gray-800'
+        ref={gameAreaRef}
+      >
+        {/* Centered horizontal cell layout - never wrap */}
+        <div className='flex flex-nowrap justify-center overflow-x-auto gap-2 sm:gap-3 mt-4 sm:mt-4 mb-4 px-4 py-2'>
           {cells.map((cell, index) => (
             <div
               key={cell.id}
               data-index={index}
-              className={`flex items-center justify-center h-5 w-5 ${
+              className={`flex-shrink-0 flex items-center justify-center h-5 w-5 sm:h-14 sm:w-14 md:h-16 md:w-16 text-xl sm:text-2xl md:text-2xl ${
                 cell.type === 'digit'
-                  ? 'text-white text-xl font-medium digit-cell'
+                  ? 'text-white font-medium digit-cell'
                   : cell.value
                     ? 'bg-green-800 rounded-md'
-                    : 'bg-gray-600  rounded-full operation-slot'
+                    : 'bg-gray-600 rounded-full operation-slot'
               }`}
               draggable={cell.draggable}
               onDragStart={(e) => cell.draggable && handleDragStart(e, cell, index)}
@@ -467,13 +479,13 @@ const HectocGame: React.FC = () => {
           ))}
         </div>
 
-        {/* Dragged item visual representation for mobile */}
+        {/* Dragged item visual - larger for mobile */}
         {touchDragging && touchSourceCell && (
           <div
-            className='absolute bg-green-800 rounded-md w-9 h-9 flex items-center justify-center pointer-events-none z-10 touch-dragging-visual'
+            className='fixed bg-green-800 rounded-md w-10 h-10 sm:w-10 sm:h-10 flex items-center justify-center pointer-events-none z-50 touch-dragging-visual'
             style={{
-              left: `${touchPosition.x - 5}px`,
-              top: `${touchPosition.y - 5}px`,
+              left: `${touchPosition.x - 20}px`,
+              top: `${touchPosition.y - 20}px`,
             }}
           >
             {touchSourceCell.value ||
@@ -495,25 +507,25 @@ const HectocGame: React.FC = () => {
           </div>
         )}
 
-        {/* Result area */}
-        <div className='mx-auto mt-4 w-[50%] max-w-xs h-12 bg-gray-700 rounded-md flex items-center justify-center px-2'>
-          <div className='text-lg font-medium text-white truncate'>
-            {message.includes('Current value:') ? message : ''}
+        {/* Result area - centered and fixed width */}
+        <div className='mx-auto mt-4 sm:mt-4 w-[40%] max-w-xs h-14 sm:h-14 bg-gray-700 rounded-md flex items-center justify-center px-3'>
+          <div className='text-lg sm:text-lg font-medium text-white truncate'>
+            {message.includes('Current value:') ? message.replace('Current value:', '').trim() : ''}
           </div>
         </div>
 
-        {/* Instructions */}
-        <div className='text-center mt-2 text-xs text-gray-300 px-2'>
+        {/* Instructions - centered text */}
+        <div className='text-center mt-3 text-sm sm:text-sm text-gray-300 px-3'>
           {!message.includes('Current value:') ? message : 'Drag the operations in the gaps'}
         </div>
       </div>
 
-      {/* Operation buttons - more compact layout */}
-      <div className='flex flex-col items-center gap-2 mt-4 px-4 w-full max-w-xs'>
-        {/* First row - 3 elements */}
-        <div className='flex justify-center gap-2 w-full'>
+      {/* Operation buttons - larger for mobile */}
+      <div className='flex flex-col items-center gap-3 sm:gap-3 mt-5 sm:mt-5 px-3 sm:px-4 w-full max-w-xs sm:max-w-sm'>
+        {/* First row */}
+        <div className='flex justify-center gap-3 sm:gap-3 w-full'>
           <div
-            className='w-12 h-12 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
+            className='w-14 h-14 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
             draggable
             data-op='+'
             onDragStart={(e) =>
@@ -534,10 +546,10 @@ const HectocGame: React.FC = () => {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            <Plus className='text-green-400' />
+            <Plus className='text-green-400 h-7 w-7 sm:h-7 sm:w-7' />
           </div>
           <div
-            className='w-12 h-12 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
+            className='w-14 h-14 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
             draggable
             data-op='-'
             onDragStart={(e) =>
@@ -558,10 +570,10 @@ const HectocGame: React.FC = () => {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            <Minus className='text-green-400' />
+            <Minus className='text-green-400 h-7 w-7 sm:h-7 sm:w-7' />
           </div>
           <div
-            className='w-12 h-12 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
+            className='w-14 h-14 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
             draggable
             data-op='*'
             onDragStart={(e) =>
@@ -582,14 +594,14 @@ const HectocGame: React.FC = () => {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            <X className='text-green-400' />
+            <X className='text-green-400 h-7 w-7 sm:h-7 sm:w-7' />
           </div>
         </div>
 
-        {/* Second row - 3 elements */}
-        <div className='flex justify-center gap-2 w-full'>
+        {/* Second row */}
+        <div className='flex justify-center gap-3 sm:gap-3 w-full'>
           <div
-            className='w-12 h-12 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
+            className='w-14 h-14 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
             draggable
             data-op='/'
             onDragStart={(e) =>
@@ -610,10 +622,10 @@ const HectocGame: React.FC = () => {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            <span className='text-green-400 text-xl'>/</span>
+            <span className='text-green-400 text-2xl sm:text-2xl'>/</span>
           </div>
           <div
-            className='w-12 h-12 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
+            className='w-14 h-14 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
             draggable
             data-op='('
             onDragStart={(e) =>
@@ -634,10 +646,10 @@ const HectocGame: React.FC = () => {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            <span className='text-green-400 text-xl'>(</span>
+            <span className='text-green-400 text-2xl sm:text-2xl'>(</span>
           </div>
           <div
-            className='w-12 h-12 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
+            className='w-14 h-14 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
             draggable
             data-op=')'
             onDragStart={(e) =>
@@ -658,14 +670,14 @@ const HectocGame: React.FC = () => {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            <span className='text-green-400 text-xl'>)</span>
+            <span className='text-green-400 text-2xl sm:text-2xl'>)</span>
           </div>
         </div>
 
-        {/* Third row - 2 elements */}
-        <div className='flex justify-center gap-2 w-full'>
+        {/* Third row */}
+        <div className='flex justify-center gap-3 sm:gap-3 w-full'>
           <div
-            className='w-12 h-12 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
+            className='w-14 h-14 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-green-900 rounded-full flex items-center justify-center cursor-grab touch-action-none'
             draggable
             data-op='^'
             onDragStart={(e) =>
@@ -686,21 +698,21 @@ const HectocGame: React.FC = () => {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            <span className='text-green-400 text-xl'>^</span>
+            <span className='text-green-400 text-2xl sm:text-2xl'>^</span>
           </div>
           <div
-            className='w-20 h-12 bg-green-900 rounded-xl flex items-center justify-center cursor-pointer'
+            className='w-24 sm:w-24 h-14 sm:h-14 bg-green-900 rounded-xl flex items-center justify-center cursor-pointer'
             onClick={undoMove}
           >
-            <span className='text-green-400 text-sm'>Undo</span>
+            <span className='text-green-400 text-base sm:text-base'>Undo</span>
           </div>
         </div>
       </div>
 
-      {/* Hint and Reset buttons */}
-      <div className='flex justify-center gap-4 mt-10 w-full max-w-xs'>
+      {/* Hint and Reset buttons - larger for mobile */}
+      <div className='flex justify-center gap-4 sm:gap-4 mt-8 sm:mt-10 w-full max-w-xs sm:max-w-sm'>
         <button
-          className='flex items-center gap-1 bg-gray-800 text-white px-3 py-2 rounded-full text-sm'
+          className='flex items-center gap-2 bg-gray-800 text-white px-4 py-2.5 sm:py-2.5 rounded-full text-base sm:text-base'
           onClick={() => {
             // Simple hint system
             const hasMultiplication = cells.some((cell) => cell.value === '*');
@@ -715,11 +727,11 @@ const HectocGame: React.FC = () => {
             }
           }}
         >
-          <Lightbulb size={16} />
+          <Lightbulb size={18} className='w-5 h-5 sm:w-5 sm:h-5' />
           <span>Hint</span>
         </button>
         <button
-          className='flex items-center gap-1 bg-gray-800 text-white px-3 py-2 rounded-full text-sm'
+          className='flex items-center gap-2 bg-gray-800 text-white px-4 py-2.5 sm:py-2.5 rounded-full text-base sm:text-base'
           onClick={resetGame}
         >
           <span>Reset</span>
