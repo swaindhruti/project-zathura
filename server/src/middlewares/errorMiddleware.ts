@@ -97,6 +97,43 @@ export const restrictTo = (...roles: string[]) => {
   };
 };
 
-export function errorHandler(err: any, req: any, res: any, next: any) {
-  res.status(500).json({ message: err.message });
+export function errorHandler(
+  err: any,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  console.error(err);
+
+  // Default error status and message
+  let statusCode = 500;
+  let message = "Internal Server Error";
+
+  // Handle various error types
+  if (err.statusCode) {
+    statusCode = err.statusCode;
+  }
+
+  if (err.message) {
+    message = err.message;
+  }
+
+  // Handle Prisma errors
+  if (err.code === "P2002") {
+    statusCode = 409;
+    message = "Duplicate entry found";
+  }
+
+  // Handle validation errors
+  if (err.name === "ZodError") {
+    statusCode = 400;
+    message = "Validation error";
+  }
+
+  // Send error response
+  res.status(statusCode).json({
+    status: "error",
+    message,
+    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
+  });
 }
