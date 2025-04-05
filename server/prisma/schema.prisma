@@ -19,10 +19,129 @@ model User {
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt
 
+    // HectoClash related fields
+    rating       Int      @default(1200)
+    gamesPlayed  Int      @default(0)
+    gamesWon     Int      @default(0)
+
+    // Relations to HectoClash
+    hectocDuelsAsPlayerOne HectocDuel[] @relation("PlayerOne")
+    hectocDuelsAsPlayerTwo HectocDuel[] @relation("PlayerTwo")
+    hectocSolutions        HectocSolution[]
+    hectocSpectating       HectocSpectator[]
+    hectocChallenges       HectocChallenge[]
+
     @@map("users")
 }
 
 enum Role {
     USER
     ADMIN
+}
+
+// HectoClash Models
+
+model HectocDuel {
+    id                String         @id @default(uuid())
+    createdAt         DateTime       @default(now())
+    startedAt         DateTime?
+    endedAt           DateTime?
+    status            HectocDuelStatus @default(WAITING)
+    
+    // Players
+    playerOneId       String
+    playerOne         User           @relation("PlayerOne", fields: [playerOneId], references: [id])
+    playerTwoId       String?
+    playerTwo         User?          @relation("PlayerTwo", fields: [playerTwoId], references: [id])
+    
+    // Game data
+    digits            Int[]          // The 6 digits for this puzzle
+    target            Int            @default(100)
+    difficulty        String         // easy, medium, hard, expert
+    
+    // Results
+    winnerId          String?
+    playerOneFinishedAt DateTime?
+    playerTwoFinishedAt DateTime?
+    
+    // Relations
+    spectators        HectocSpectator[]
+    solutions         HectocSolution[]
+
+    @@map("hectoc_duels")
+    @@index([playerOneId])
+    @@index([playerTwoId])
+    @@index([status])
+}
+
+model HectocSolution {
+    id               String     @id @default(uuid())
+    createdAt        DateTime   @default(now())
+    
+    // User who submitted the solution
+    userId           String
+    user             User       @relation(fields: [userId], references: [id])
+    
+    // Duel this solution belongs to
+    duelId           String
+    duel             HectocDuel @relation(fields: [duelId], references: [id])
+    
+    // Solution data
+    expression       String     // The actual solution expression
+    isCorrect        Boolean
+    timeToSolve      Int        // Time in milliseconds
+    
+    @@map("hectoc_solutions")
+    @@index([userId])
+    @@index([duelId])
+}
+
+model HectocSpectator {
+    id               String     @id @default(uuid())
+    
+    // User who is spectating
+    userId           String
+    user             User       @relation(fields: [userId], references: [id])
+    
+    // Duel being spectated
+    duelId           String
+    duel             HectocDuel @relation(fields: [duelId], references: [id])
+    
+    joinedAt         DateTime   @default(now())
+    
+    @@map("hectoc_spectators")
+    @@unique([duelId, userId])
+}
+
+model HectocChallenge {
+    id               String     @id @default(uuid())
+    createdAt        DateTime   @default(now())
+    
+    // User who sent the challenge
+    challengerId     String
+    challenger       User       @relation(fields: [challengerId], references: [id])
+    
+    // Challenge configuration
+    difficulty       String?    // Specific difficulty or null for random
+    message          String?    
+    expiresAt        DateTime
+    status           HectocChallengeStatus @default(PENDING)
+    
+    @@map("hectoc_challenges")
+    @@index([challengerId])
+    @@index([status])
+}
+
+enum HectocDuelStatus {
+    WAITING
+    IN_PROGRESS
+    FINISHED
+    CANCELLED
+}
+
+enum HectocChallengeStatus {
+    PENDING
+    ACCEPTED
+    REJECTED
+    EXPIRED
 }
