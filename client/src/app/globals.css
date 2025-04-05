@@ -45,6 +45,12 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+@theme {
+  --font-inter: var(--font-inter);
+  --font-satoshi: var(----font-satoshi);
+  --font-air: var(--font-air);
+}
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -122,5 +128,74 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Custom styles for the game UI */
+  .game-mode-card {
+    @apply rounded-[0.625rem] border-[1px] border-[#757575]/80 px-4 py-[10px];
+  }
+
+  .multiplayer-card {
+    background: linear-gradient(
+      101deg,
+      #90fe95 -26.31%,
+      #4e7d50 -19.97%,
+      #49724a -15.38%,
+      #426644 -10.33%,
+      #1e1e1e 14.18%,
+      #262e27 69.8%,
+      rgba(144, 254, 149, 0.55) 207.82%
+    );
+  }
+
+  .tournament-card {
+    background: linear-gradient(
+      104deg,
+      #90d7fe -28.13%,
+      #4e757d -21.61%,
+      #496672 -16.89%,
+      #426466 -11.7%,
+      #1e1e1e 13.51%,
+      #262a2e 70.71%,
+      rgba(144, 236, 254, 0.55) 212.64%
+    );
+  }
+
+  .friends-card {
+    background: linear-gradient(
+      101deg,
+      #90fe95 -26.31%,
+      #4e7d50 -19.97%,
+      #49724a -15.38%,
+      #426644 -10.33%,
+      #1e1e1e 14.18%,
+      #262e27 69.8%,
+      rgba(144, 254, 149, 0.55) 207.82%
+    );
+  }
+
+  .solo-card {
+    background: linear-gradient(
+      101deg,
+      #90fe95 -26.31%,
+      #4e7d50 -19.97%,
+      #49724a -15.38%,
+      #426644 -10.33%,
+      #1e1e1e 14.18%,
+      #262e27 69.8%,
+      rgba(144, 254, 149, 0.55) 207.82%
+    );
+  }
+
+  .nav-item {
+    @apply flex flex-col items-center justify-center text-xs font-medium gap-[3px] font-satoshi;
+  }
+
+  .nav-active {
+    @apply text-green-500;
+  }
+
+  .game-tag {
+    @apply px-2 py-1 rounded-full text-xs flex items-center gap-1 bg-[#353B35];
   }
 }
