@@ -8,21 +8,84 @@ datasource db {
 }
 
 model User {
-    id           String   @id @default(uuid())
-    email        String   @unique
-    username     String   @unique
+    id           String       @id @default(uuid())
+    email        String       @unique
+    username     String       @unique
     password     String
     firstName    String?
     lastName     String?
-    role         Role     @default(USER)
+    role         Role         @default(USER)
     refreshToken String?
-    createdAt    DateTime @default(now())
-    updatedAt    DateTime @updatedAt
+    createdAt    DateTime     @default(now())
+    updatedAt    DateTime     @updatedAt
+    // Add game-related fields
+    gameStats    GameStats?
+    playerGames  PlayerGame[]
 
     @@map("users")
+}
+
+// User's overall game statistics
+model GameStats {
+    id            String   @id @default(uuid())
+    userId        String   @unique
+    user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    totalGames    Int      @default(0)
+    gamesWon      Int      @default(0)
+    mathScore     Int      @default(0)
+    wordScore     Int      @default(0)
+    hectocScore   Int      @default(0)
+    highestStreak Int      @default(0)
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+
+    @@map("game_stats")
+}
+
+// Game session details
+model Game {
+    id         String       @id @default(uuid())
+    type       GameType
+    difficulty Difficulty
+    startTime  DateTime
+    endTime    DateTime?
+    players    PlayerGame[]
+    createdAt  DateTime     @default(now())
+    updatedAt  DateTime     @updatedAt
+
+    @@map("games")
+}
+
+// Junction table for player-game relationship
+model PlayerGame {
+    id        String   @id @default(uuid())
+    userId    String
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    gameId    String
+    game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+    score     Int      @default(0)
+    position  Int      @default(0)
+    isWinner  Boolean  @default(false)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@unique([userId, gameId])
+    @@map("player_games")
 }
 
 enum Role {
     USER
     ADMIN
+}
+
+enum GameType {
+    MATH_CHALLENGE
+    WORD_SCRAMBLE
+    HECTOC_GAME
+}
+
+enum Difficulty {
+    EASY
+    MEDIUM
+    HARD
 }
