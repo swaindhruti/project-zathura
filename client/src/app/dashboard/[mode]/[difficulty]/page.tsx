@@ -1,4 +1,5 @@
-import React from 'react';
+'use client';
+import Game from '@/components/dashboard/game';
 
 interface PageParams {
   mode: string;
@@ -7,14 +8,6 @@ interface PageParams {
 
 export default async function Page({ params }: { params: PageParams }) {
   const { mode, difficulty } = await params;
-  console.log('Mode:', mode);
-  console.log('Difficulty:', difficulty);
 
-  return (
-    <div>
-      <h1>Game Page</h1>
-      <p>Mode: {mode}</p>
-      <p>Difficulty: {difficulty}</p>
-    </div>
-  );
+  return <Game difficulty={difficulty} mode={mode} />;
 }
