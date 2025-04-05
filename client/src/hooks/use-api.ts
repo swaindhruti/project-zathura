@@ -37,5 +37,5 @@ export const useApi = () => {
     }
   };
 
-  return { makeRequest, isLoading, status };
+  return { makeRequest, isLoading };
 };

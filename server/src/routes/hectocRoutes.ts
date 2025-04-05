@@ -3,6 +3,8 @@ import {
     getPuzzle,
     getSolution,
     verifyPuzzleSolution,
+    saveScores,
+    getGameResults,
 } from "../controllers/hectocController";
 import { protect } from "@/middlewares/errorMiddleware";
 
@@ -13,5 +15,7 @@ router.use(protect);
 router.post("/puzzle", getPuzzle);
 router.post("/verify", verifyPuzzleSolution);
 router.post("/solution", getSolution);
+router.post("/save", saveScores);
+router.get("/results", getGameResults);
 
 export default router;

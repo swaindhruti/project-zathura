@@ -1,4 +1,3 @@
-'use client';
 import Game from '@/components/dashboard/game';
 
 interface PageParams {

@@ -140,7 +140,6 @@ export class HectocService {
         try {
             const { difficulty, target = 100, isDuel = false } = options;
 
-            // Validate difficulty
             const allowedDifficulties = [
                 "easy",
                 "moderate",
@@ -154,7 +153,7 @@ export class HectocService {
 
             // Generate puzzles for the game
             const puzzles = this.generateHectocPuzzles(
-                5,
+                2,
                 validatedDifficulty,
                 target,
                 6
@@ -164,14 +163,9 @@ export class HectocService {
                 throw new Error("Failed to generate puzzles for the game");
             }
 
-            // Store the puzzles in Redis
             await this.redisClient.storePuzzles(puzzles);
 
-            // Use Prisma client to create the game in the database
-
-            // Create transaction to ensure game and participant are created together
             const game = await prisma.$transaction(async (tx) => {
-                // Create the game
                 const newGame = await tx.hectocGame.create({
                     data: {
                         difficulty: validatedDifficulty,
@@ -187,7 +181,6 @@ export class HectocService {
                     },
                 });
 
-                // Add the creator as a participant
                 await tx.gameParticipant.create({
                     data: {
                         gameId: newGame.id,

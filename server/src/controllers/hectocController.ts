@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { HectocService } from "@/services/hectocService";
+import prisma from "@/lib/prisma";
 
 const hectocService = new HectocService();
 
@@ -18,7 +19,9 @@ export const getPuzzle = async (
         }
         const { difficulty } = req.body;
 
-        const puzzle = await hectocService.generatePuzzle(difficulty);
+        const puzzle = await hectocService.createHectocGame(userId, {
+            difficulty,
+        });
 
         res.status(200).json({
             puzzle,
@@ -34,13 +37,13 @@ export const verifyPuzzleSolution = async (
     next: NextFunction
 ) => {
     try {
-        const userId = req.user?.id;
-        if (!userId) {
-            return res.status(401).json({
-                valid: false,
-                reason: "Please Login to continue",
-            });
-        }
+        // const userId = req.user?.id;
+        // if (!userId) {
+        //     return res.status(401).json({
+        //         valid: false,
+        //         reason: "Please Login to continue",
+        //     });
+        // }
         const { digits, solution, target = 100 } = req.body;
 
         if (digits.length !== 6) {
@@ -143,6 +146,54 @@ export const saveScores = async (req: Request, res: Response) => {
         res.status(500).json({
             valid: false,
             reason: "An error occurred while saving scores.",
+        });
+    }
+};
+
+export const getGameResults = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                reason: "Please Login to continue",
+            });
+        }
+
+        const results = await prisma.result.findMany({
+            where: {
+                userId: userId,
+            },
+            include: {
+                game: {
+                    select: {
+                        difficulty: true,
+                        target: true,
+                        isDuel: true,
+                        status: true,
+                        startedAt: true,
+                        endedAt: true,
+                    },
+                },
+            },
+            orderBy: {
+                createdAt: "desc",
+            },
+        });
+
+        res.status(200).json({
+            success: true,
+            results,
+        });
+    } catch (error) {
+        console.error("Error retrieving game results:", error);
+        res.status(500).json({
+            success: false,
+            reason: "Failed to retrieve game results",
         });
     }
 };
