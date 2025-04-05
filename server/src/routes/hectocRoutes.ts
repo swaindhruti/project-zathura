@@ -4,8 +4,11 @@ import {
     getSolution,
     verifyPuzzleSolution,
 } from "../controllers/hectocController";
+import { protect } from "@/middlewares/errorMiddleware";
 
 const router = express.Router();
+
+router.use(protect);
 
 router.post("/puzzle", getPuzzle);
 router.post("/verify", verifyPuzzleSolution);
