@@ -7,6 +7,7 @@ import { errorHandler } from "./middlewares/errorMiddleware";
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
 import hectocRoutes from "./routes/hectocRoutes";
+import friendRoutes from "./routes/friendRoutes";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -29,6 +30,7 @@ app.use(
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/hectoc", hectocRoutes);
+app.use("/api/friends", friendRoutes);
 
 app.get("/api/health", (req, res) => {
     res.status(200).json({ status: "success", message: "Server is running" });

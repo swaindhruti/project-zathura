@@ -31,13 +31,56 @@ model User {
     hectocSpectating       HectocSpectator[]
     hectocChallenges       HectocChallenge[]
 
+    sentRequests     FriendRequest[] @relation("SentRequests")
+    receivedRequests FriendRequest[] @relation("ReceivedRequests")
+     
+     // Friendship relations
+    friendsTo   Friendship[] @relation("UserFriends")
+    friendsFrom Friendship[] @relation("FriendsUser")
+
     @@map("users")
 }
+
+model FriendRequest {
+     id         String           @id @default(uuid())
+     status     FriendshipStatus @default(PENDING)
+     senderId   String
+     receiverId String
+     createdAt  DateTime         @default(now())
+     updatedAt  DateTime         @updatedAt
+ 
+     // Relations
+     sender   User @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
+     receiver User @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+ 
+     @@unique([senderId, receiverId])
+     @@map("friend_requests")
+ }
+ 
+ model Friendship {
+     id        String   @id @default(uuid())
+     userId    String
+     friendId  String
+     createdAt DateTime @default(now())
+ 
+     // Relations
+     user   User @relation("UserFriends", fields: [userId], references: [id], onDelete: Cascade)
+     friend User @relation("FriendsUser", fields: [friendId], references: [id], onDelete: Cascade)
+ 
+     @@unique([userId, friendId])
+     @@map("friendships")
+ }
 
 enum Role {
     USER
     ADMIN
 }
+
+enum FriendshipStatus {
+     PENDING
+     ACCEPTED
+     REJECTED
+ }
 
 // HectoClash Models
 
