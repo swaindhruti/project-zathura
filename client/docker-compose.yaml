@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  next-app:
+    container_name: webcrafters-client
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+    environment:
+      - NODE_ENV=development
+    command: yarn dev
