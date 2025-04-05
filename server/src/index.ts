@@ -6,6 +6,7 @@ import morgan from "morgan";
 import { errorHandler } from "./middlewares/errorMiddleware";
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
+import hectocRoutes from "./routes/hectocRoutes";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -16,28 +17,25 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan("dev"));
 app.use(
-  cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? "https://your-production-domain.com"
-        : "http://localhost:3000",
-    credentials: true,
-  })
+    cors({
+        origin:
+            process.env.NODE_ENV === "production"
+                ? "https://your-production-domain.com"
+                : "http://localhost:3000",
+        credentials: true,
+    })
 );
 
-// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/hectoc", hectocRoutes);
 
-// Health check route
 app.get("/api/health", (req, res) => {
-  res.status(200).json({ status: "success", message: "Server is running" });
+    res.status(200).json({ status: "success", message: "Server is running" });
 });
 
-// Error handler
 app.use(errorHandler);
 
-// Start server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
