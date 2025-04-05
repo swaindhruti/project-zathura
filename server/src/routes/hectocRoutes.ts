@@ -7,7 +7,7 @@ import {
 
 const router = express.Router();
 
-router.get("/puzzle", getPuzzle);
+router.post("/puzzle", getPuzzle);
 router.post("/verify", verifyPuzzleSolution);
 router.post("/solution", getSolution);
 

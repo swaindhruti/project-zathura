@@ -9,9 +9,9 @@ export const getPuzzle = async (
     next: NextFunction
 ) => {
     try {
-        const { difficulty } = req.query;
+        const { difficulty } = req.body;
 
-        const puzzle = await hectocService.generatePuzzle(difficulty as string);
+        const puzzle = await hectocService.generatePuzzle(difficulty);
 
         res.status(200).json({
             puzzle,
@@ -61,14 +61,14 @@ export const getSolution = async (
     next: NextFunction
 ) => {
     try {
-        const { digits } = req.body;
-        if (digits.length !== 6) {
+        const { questionId } = req.body;
+        if (!questionId) {
             return res.status(400).json({
                 valid: false,
-                reason: "Invalid request. Please provide 6 digits.",
+                reason: "Invalid request. Please provide a question ID.",
             });
         }
-        const solution = await hectocService.getSolution(digits);
+        const solution = await hectocService.getSolution(questionId);
         res.status(200).json(solution);
     } catch (error) {
         console.error("Error in getSolution:", error);
