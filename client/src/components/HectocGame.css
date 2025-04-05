@@ -1,0 +1,518 @@
+:root {
+  --primary: #0a0;
+  --primary-dark: #080;
+  --secondary: #0c0;
+  --accent: #6f6;
+  --danger: #f00;
+  --danger-dark: #c00;
+  --success: #0f8;
+  --warning: #fa0;
+  --light: #eee;
+  --dark: #111;
+  --bg-dark: #121212;
+  --bg-darker: #0a0a0a;
+  --bg-medium: #1e1e1e;
+  --text-green: #3f3;
+  --text-light: #efe;
+  --border-radius: 8px;
+  --shadow-sm: 0 2px 4px rgba(0, 255, 0, 0.1);
+  --shadow-md: 0 4px 8px rgba(0, 255, 0, 0.2);
+  --glow: 0 0 8px rgba(0, 255, 0, 0.5);
+  --transition: all 0.2s ease;
+}
+
+body {
+  background-color: var(--bg-dark);
+  margin: 0;
+  padding: 0;
+  color: var(--text-light);
+}
+
+.hectoc-game {
+  font-family:
+    'SF Pro Display',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  max-width: 100%;
+  padding: 1rem;
+  color: var(--text-light);
+  line-height: 1.6;
+  background: var(--bg-dark);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* Game Header */
+.game-header {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.game-title {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-green);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  text-align: center;
+  text-shadow: var(--glow);
+}
+
+.game-subtitle {
+  color: var(--text-light);
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+}
+
+/* Operations Panel */
+.operations-panel {
+  width: 100%;
+  max-width: 500px;
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: var(--bg-medium);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  position: relative;
+  border: 1px solid var(--primary);
+  overflow-x: auto;
+}
+
+.panel-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-green);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.operations-container {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  gap: 10px;
+  padding: 10px;
+  justify-content: center;
+}
+
+.operation-tile {
+  width: 3rem;
+  height: 3rem;
+  background-color: var(--bg-darker);
+  color: var(--text-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius);
+  cursor: grab;
+  font-size: 1.5rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  user-select: none;
+  border: 1px solid var(--primary);
+}
+
+.operation-tile:hover,
+.operation-tile:active {
+  background-color: var(--primary-dark);
+  color: var(--light);
+  transform: translateY(-2px);
+  box-shadow: var(--glow);
+}
+
+/* Game Board */
+.game-board {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 1.5rem 0;
+  flex-wrap: wrap;
+  min-height: 4rem;
+  width: 100%;
+  max-width: 500px;
+  padding: 1rem;
+  background-color: var(--bg-medium);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--primary);
+  flex-wrap: nowrap; /* Prevent wrapping */
+  overflow-x: auto; /* Allow horizontal scrolling if needed */
+  width: 100%;
+  padding: 10px 0;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 80px; /* Ensure consistent height */
+  margin: 20px 0;
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  transition: var(--transition);
+  position: relative;
+  min-width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0; /* Prevent cells from shrinking */
+  font-size: clamp(16px, 4vw, 24px); /* Responsive font size */
+}
+
+.cell.digit {
+  color: var(--text-light);
+  padding: 0 0.25rem;
+  min-width: 1.5rem;
+}
+
+.cell.operation {
+  width: 2.8rem;
+  height: 2.8rem;
+  color: var(--text-green);
+  cursor: grab;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 255, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.cell.operation.has-value {
+  background: var(--primary-dark);
+  color: var(--light);
+  box-shadow: var(--glow);
+}
+
+.cell.operation.empty::after {
+  content: '□';
+  color: rgba(0, 255, 0, 0.3);
+  font-size: 1.5rem;
+}
+
+.cell.drop-target {
+  background: rgba(0, 255, 0, 0.3);
+  transform: scale(1.05);
+}
+
+/* Messages & Feedback */
+.game-message {
+  margin: 1rem 0;
+  font-size: 1.1rem;
+  min-height: 1.5rem;
+  padding: 0.75rem;
+  border-radius: var(--border-radius);
+  background: var(--bg-medium);
+  text-align: center;
+  font-weight: 500;
+  color: var(--text-green);
+  width: 100%;
+  max-width: 500px;
+  border: 1px solid var(--primary);
+}
+
+.message-success {
+  color: var(--success);
+  background: rgba(0, 255, 136, 0.1);
+}
+
+.message-error {
+  color: var(--danger);
+  background: rgba(255, 56, 96, 0.1);
+}
+
+/* Buttons */
+.button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.button:active {
+  transform: translateY(0);
+}
+
+.reset-button {
+  background-color: var(--danger);
+  color: var(--light);
+}
+
+.reset-button:hover {
+  background-color: var(--danger-dark);
+}
+
+.undo-button {
+  background-color: var(--bg-medium);
+  color: var(--text-green);
+  border: 1px solid var(--primary);
+}
+
+.undo-button:not(:disabled):hover {
+  background-color: var(--primary-dark);
+  color: var(--light);
+}
+
+.undo-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Game Controls */
+.game-controls {
+  display: flex;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  justify-content: center;
+  flex-wrap: wrap;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+/* Rules Section */
+.game-rules {
+  margin-top: 1.5rem;
+  text-align: left;
+  background: var(--bg-medium);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--primary);
+  width: 100%;
+  max-width: 500px;
+}
+
+.rules-title {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: var(--text-green);
+  font-weight: 600;
+}
+
+.rules-list {
+  padding-left: 1.25rem;
+  margin: 0;
+}
+
+.rules-list li {
+  margin-bottom: 0.75rem;
+  color: var(--text-light);
+}
+
+/* Drag and Drop States */
+.operations-panel.drag-over {
+  background-color: rgba(0, 255, 0, 0.1);
+  border: 2px dashed var(--primary);
+}
+
+.drop-hint {
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: var(--text-light);
+  font-style: italic;
+  text-align: center;
+}
+
+.mobile-hint {
+  display: none;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 480px) {
+  :root {
+    --cell-size: 2.5rem;
+  }
+
+  .hectoc-game {
+    padding: 0.8rem;
+  }
+
+  .game-title {
+    font-size: 1.8rem;
+  }
+
+  .cell {
+    font-size: 1.3rem;
+  }
+
+  .cell.operation {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .operation-tile {
+    width: 2.2rem;
+    height: 2.2rem;
+    font-size: 1.1rem;
+  }
+
+  .game-controls {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .button {
+    width: 100%;
+    max-width: none;
+  }
+
+  .game-rules {
+    padding: 0.8rem;
+  }
+
+  .rules-list li {
+    font-size: 0.85rem;
+  }
+
+  .cell {
+    min-width: 30px;
+    height: 30px;
+  }
+
+  .game-board {
+    justify-content: center; /* Center the scrollable area on small screens */
+  }
+
+  /* Add a visual indicator that the board is scrollable */
+  .game-board::after {
+    content: '→';
+    position: absolute;
+    right: 10px;
+    opacity: 0.7;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      opacity: 0.3;
+    }
+    50% {
+      opacity: 0.7;
+    }
+    100% {
+      opacity: 0.3;
+    }
+  }
+
+  .mobile-hint {
+    display: block;
+  }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+  .hectoc-game {
+    padding: 0.5rem;
+  }
+
+  .cell.operation {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.25rem;
+  }
+
+  .operation-tile {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.25rem;
+  }
+
+  .game-title {
+    font-size: 1.75rem;
+  }
+
+  .game-board {
+    padding: 0.5rem;
+  }
+
+  .button {
+    padding: 0.5rem 1rem;
+  }
+
+  .operations-panel,
+  .game-rules {
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .cell.operation {
+    width: 2.2rem;
+    height: 2.2rem;
+    font-size: 1.1rem;
+  }
+
+  .operation-tile {
+    width: 2.2rem;
+    height: 2.2rem;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .cell {
+    min-width: 35px;
+    height: 35px;
+  }
+}
+
+/* Add touch support for better mobile experience */
+@media (hover: none) {
+  .operation-tile:active {
+    background-color: var(--primary-dark);
+    color: var(--light);
+    transform: scale(0.95);
+  }
+
+  .button:active {
+    transform: scale(0.95);
+  }
+}
+
+/* Animation for success */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.success-pulse {
+  animation: pulse 0.5s ease-in-out;
+}
