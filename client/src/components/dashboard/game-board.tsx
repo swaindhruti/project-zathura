@@ -26,15 +26,17 @@ export default function GameBoard({
 
   return (
     <div className='flex flex-col items-center'>
-      <h2 className='text-2xl font-bold text-white mb-6'>
+      <h2 className='text-2xl font-bold text-white mb-6 font-satoshi'>
         Puzzle {currentPuzzleIndex + 1} of {puzzles.length}
       </h2>
 
-      <div className={`mb-4 text-lg font-bold ${timeLeft <= 10 ? 'text-red-500' : 'text-white'}`}>
+      <div
+        className={`font-satoshi mb-4 text-lg font-bold ${timeLeft <= 10 ? 'text-red-500' : 'text-white'}`}
+      >
         Time Left: {timeLeft}s
       </div>
 
-      <div className='flex gap-4 mb-8'>
+      <div className='flex gap-4 mb-8 font-air'>
         {puzzles[currentPuzzleIndex].digits.map((digit, index) => (
           <div
             key={index}
@@ -46,7 +48,7 @@ export default function GameBoard({
       </div>
 
       <form onSubmit={onSubmit} className='w-full max-w-md'>
-        <div className='flex flex-col gap-4'>
+        <div className='flex flex-col gap-4 font-satoshi'>
           <input
             type='text'
             value={userInput}
@@ -56,7 +58,7 @@ export default function GameBoard({
           />
           <button
             type='submit'
-            className='bg-[#292929] border border-[#90FE95] hover:bg-[#353B35] text-white px-4 py-3 rounded-lg transition-all duration-300 hover:scale-105'
+            className='font-satoshi bg-[#292929] border border-[#90FE95] hover:bg-[#353B35] text-white px-4 py-3 rounded-lg transition-all duration-300 hover:scale-105'
           >
             Submit Solution
           </button>
@@ -64,7 +66,7 @@ export default function GameBoard({
       </form>
 
       <div className='mt-6 text-white'>
-        <p className='text-center text-gray-400 text-sm'>
+        <p className='text-center text-gray-400 text-sm font-satoshi'>
           Use the given digits and operations like +, -, *, /, () to create an expression equal to
           100
         </p>

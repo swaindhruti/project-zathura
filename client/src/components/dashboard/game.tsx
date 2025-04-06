@@ -437,7 +437,7 @@ export default function Game({ difficulty, mode }: GameProps) {
     return (
       <div className='px-5 py-2'>
         <div className='flex items-start flex-col gap-1.5'>
-          <h1 className='text-4xl font-[900] tracking-wide text-white mb-1'>HECTOCLASH</h1>
+          <h1 className='text-4xl font-[900] tracking-wide text-white mb-1 font-air'>HECTOCLASH</h1>
           <p className='text-white mb-4 font-satoshi font-[500] text-sm'>
             {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} Difficulty - Find Opponents
           </p>
@@ -454,7 +454,7 @@ export default function Game({ difficulty, mode }: GameProps) {
           onlinePlayers={onlinePlayers}
           sentInvitation={sentInvitation}
           onInvitePlayer={handleInvitePlayer}
-          onPlaySolo={() => router.push('/dashboard/game/solo/' + difficulty)}
+          onPlaySolo={() => router.push('/dashboard/solo/' + difficulty)}
         />
       </div>
     );
@@ -471,13 +471,13 @@ export default function Game({ difficulty, mode }: GameProps) {
       <div className='px-5 py-2'>
         <h1 className='text-4xl font-[900] tracking-wide text-white mb-1'>Game Finished!</h1>
 
-        <div className='game-mode-card multiplayer-card p-6 flex flex-col items-center justify-center'>
-          <h2 className='text-2xl font-bold text-white mb-6'>
+        <div className='game-mode-card multiplayer-card p-6 flex flex-col items-center justify-center mt-5'>
+          <h2 className='text-2xl font-bold text-white mb-6 font-air capitalize'>
             {winner === currentPlayer?.username ? 'You won! 🎉' : `${winner} won! 👑`}
           </h2>
 
           <div className='flex justify-between w-full max-w-md bg-[#292929] p-4 rounded-lg mb-6'>
-            <div className='text-center'>
+            <div className='text-center font-satoshi'>
               <p className='text-gray-400'>You</p>
               <p className='text-2xl font-bold text-white'>{totalScore}</p>
               <p className='text-sm text-gray-400'>
@@ -487,7 +487,7 @@ export default function Game({ difficulty, mode }: GameProps) {
               </p>
             </div>
 
-            <div className='text-center'>
+            <div className='text-center font-satoshi'>
               <p className='text-gray-400'>{opponent?.username}</p>
               <p className='text-2xl font-bold text-white'>{opponent?.score}</p>
               <p className='text-sm text-gray-400'>
@@ -500,7 +500,7 @@ export default function Game({ difficulty, mode }: GameProps) {
 
           <button
             onClick={() => router.push('/dashboard')}
-            className='bg-[#292929] border border-[#90FE95] hover:bg-[#353B35] text-white px-6 py-3 rounded-lg transition-all duration-300 hover:scale-105'
+            className='font-satoshi bg-[#292929] border border-[#90FE95] hover:bg-[#353B35] text-white px-6 py-3 rounded-lg transition-all duration-300 hover:scale-105'
           >
             Back to Arena
           </button>
@@ -509,7 +509,6 @@ export default function Game({ difficulty, mode }: GameProps) {
     );
   }
 
-  // Render multiplayer game UI
   if (isMultiplayer && !isWaitingForOpponent) {
     return (
       <div className='px-5 py-2'>
