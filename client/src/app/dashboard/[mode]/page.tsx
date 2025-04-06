@@ -9,10 +9,10 @@ async function DifficultySelector({ params }: { params: Promise<{ mode: string }
     <div className='min-h-screen bg-[#1C1C1E] text-white p-4 flex justify-center'>
       <div className='w-full max-w-md mx-auto'>
         <div className='flex justify-between items-center mb-8 md:mb-12'>
-          <button className='p-2 bg-[#FFF] rounded-xl'>
+          <Link href={'/dashboard'} className='p-2 bg-[#FFF] rounded-xl'>
             <ArrowLeft size={20} color='#000' />
-          </button>
-          <button className='help-button'>How to Play?</button>
+          </Link>
+          <button className='help-button font-satoshi'>How to Play ?</button>
         </div>
 
         <h1 className='text-2xl md:text-3xl font-semibold mb-10 md:mb-16 font-air'>
