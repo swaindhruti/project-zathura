@@ -31,7 +31,7 @@ const GameNavigation: React.FC = ({}) => {
       </Link>
 
       <Link
-        href='/profile'
+        href='/dashboard/profile'
         className={`nav-item ${isActive('/profile') ? 'nav-active' : 'text-gray-400'}`}
       >
         <UserCircle className='size-6' />

@@ -21,7 +21,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Get the server URL from environment variables
-    const serverUrl = 'http://localhost:4000';
+    const serverUrl = process.env.NEXT_PUBLIC_SOCKET_URL;
 
     // Initialize socket connection
     const socketInstance = io(serverUrl, {

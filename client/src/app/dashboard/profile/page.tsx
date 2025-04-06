@@ -3,6 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { ArrowLeft, Trophy, User, Zap, Activity, Mail, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
+import { useApi } from '@/hooks/use-api';
+import { useSession } from 'next-auth/react';
+import { toast } from 'sonner';
 
 interface UserData {
   id: string;
@@ -29,25 +32,30 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const { makeRequest, isLoading } = useApi();
+  const { data, status } = useSession();
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
         setLoading(true);
 
-        const token = localStorage.getItem('token');
-        const response = await axios.get<ApiResponse>(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/me`,
-          {
-            withCredentials: true,
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: token ? `Bearer ${token}` : '',
-            },
-          }
-        );
+        const token = data?.accessToken;
+        if (!token) {
+          setLoading(false);
+          return;
+        }
 
-        console.log('Profile response:', response.data);
-        setProfile(response.data.data.user);
+        const response = await makeRequest(
+          'GET',
+          '/auth/me',
+          token as string,
+          null,
+          'Failed to fetch profile'
+        );
+        // console.log('Profile response:', response);
+        if (!response) toast.error('Some error occured');
+        setProfile(response.data.user);
         setLoading(false);
       } catch (err) {
         console.error('Failed to fetch profile:', err);
@@ -57,7 +65,7 @@ const ProfilePage = () => {
     };
 
     fetchUserProfile();
-  }, []);
+  }, [status, data?.accessToken]);
 
   // Format date to a readable format
   const formatDate = (dateString: string) => {
@@ -126,7 +134,9 @@ const ProfilePage = () => {
 
               <div className='flex items-center gap-3'>
                 <Calendar size={18} className='text-[#90FE95]' />
-                <span className='text-white font-santoshi'>Member since {formatDate(profile.createdAt)}</span>
+                <span className='text-white font-santoshi'>
+                  Member since {formatDate(profile.createdAt)}
+                </span>
               </div>
             </div>
           </div>
