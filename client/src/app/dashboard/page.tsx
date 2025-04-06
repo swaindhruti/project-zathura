@@ -13,7 +13,6 @@ const Dashboard = () => {
       <GameHeader firePoints={8} xpPoints={12} />
 
       <div className='px-5 py-2 flex flex-col h-[78dvh]'>
-        \{' '}
         <div className='flex items-start flex-col gap-1.5 mb-6'>
           <h1 className='text-4xl font-[900] tracking-wide text-white mb-1'>HECTOCLASH</h1>
           <p className='text-white font-satoshi font-[500] text-sm'>
