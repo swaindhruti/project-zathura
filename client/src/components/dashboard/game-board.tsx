@@ -36,7 +36,7 @@ export default function GameBoard({
         Time Left: {timeLeft}s
       </div>
 
-      <div className='flex gap-4 mb-8 font-air'>
+      <div className='flex gap-2 mb-8 font-air'>
         {puzzles[currentPuzzleIndex].digits.map((digit, index) => (
           <div
             key={index}

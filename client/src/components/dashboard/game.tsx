@@ -11,8 +11,6 @@ import { Player, OnlinePlayer, GameInvitation, Puzzle, PuzzleResult } from '@/ty
 import GameInvitationUI from './game-invitation';
 import OnlinePlayersList from './online-players';
 import GameBoard from './game-board';
-import MultiplayerStatus from './multiplayer-status';
-
 interface GameProps {
   difficulty: string;
   mode: string;
@@ -28,32 +26,32 @@ export default function Game({ difficulty, mode }: GameProps) {
   const router = useRouter();
   const isFetchingRef = useRef(false);
 
-  // Socket related states for multiplayer
   const { isConnected, joinRoom, leaveRoom, emit, on } = useSocketEvents();
   const [roomId, setRoomId] = useState<string | null>(null);
   const [isWaitingForOpponent, setIsWaitingForOpponent] = useState(false);
   const [opponent, setOpponent] = useState<Player | null>(null);
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
   const [isMultiplayer, setIsMultiplayer] = useState(mode !== 'solo');
+  const isDualMode = mode === 'dual';
   const [matchEnded, setMatchEnded] = useState(false);
   const [winner, setWinner] = useState<string | null>(null);
 
-  // Online players list and invitations
   const [onlinePlayers, setOnlinePlayers] = useState<OnlinePlayer[]>([]);
   const [pendingInvitation, setPendingInvitation] = useState<GameInvitation | null>(null);
   const [sentInvitation, setSentInvitation] = useState<{ id: string; toPlayer: string } | null>(
     null
   );
 
-  // Timer state
   const [timeLeft, setTimeLeft] = useState(300);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Results tracking
   const [results, setResults] = useState<PuzzleResult[]>([]);
   const startTimeRef = useRef<number | null>(null);
   const totalTimeRef = useRef<number>(0);
   const [totalScore, setTotalScore] = useState(0);
+
+  const [playerFinalScore, setPlayerFinalScore] = useState(0);
+  const [opponentFinalScore, setOpponentFinalScore] = useState(0);
 
   useEffect(() => {
     if (isConnected && status === 'authenticated' && session?.user) {
@@ -66,9 +64,25 @@ export default function Game({ difficulty, mode }: GameProps) {
           isFinished: false,
         },
         difficulty: isMultiplayer ? difficulty : null,
+        mode: mode,
       });
 
       emit('getOnlinePlayers', '');
+
+      if (isMultiplayer && !isDualMode) {
+        setIsWaitingForOpponent(true);
+        emit('joinMatchmaking', {
+          player: {
+            id: session.user.id as string,
+            username: session.user.username as string,
+            score: 0,
+            currentPuzzleIndex: 0,
+            isFinished: false,
+          },
+          difficulty,
+          mode: mode,
+        });
+      }
 
       const onlinePlayersCleanup = on('onlinePlayersList', (players: OnlinePlayer[]) => {
         setOnlinePlayers(players);
@@ -188,7 +202,7 @@ export default function Game({ difficulty, mode }: GameProps) {
 
           const opponentPlayer = data.players.find((p) => p.id !== player.id);
           if (opponentPlayer) setOpponent(opponentPlayer);
-
+          console.log(data.puzzles);
           setPuzzles(data.puzzles);
           setIsWaitingForOpponent(false);
           setSentInvitation(null);
@@ -206,6 +220,7 @@ export default function Game({ difficulty, mode }: GameProps) {
           isFinished: boolean;
         }) => {
           if (data.playerId !== player.id) {
+            setOpponentFinalScore(data.score);
             setOpponent((prev) => {
               if (!prev) return null;
               return {
@@ -222,17 +237,42 @@ export default function Game({ difficulty, mode }: GameProps) {
 
       const gameEndCleanup = on(
         'gameEnded',
-        (data: { winnerId: string; players: Player[]; reason?: string }) => {
-          const winner = data.players.find((p) => p.id === data.winnerId);
-          if (winner) setWinner(winner.username);
+        (data: { winnerId: string | null; players: Player[]; reason?: string }) => {
+          if (timerRef.current) clearTimeout(timerRef.current);
+          setMatchEnded(true);
+
+          const opponentData = data.players.find((p) => p.id !== player.id);
+          const playerData = data.players.find((p) => p.id === player.id);
+
+          if (opponentData) {
+            setOpponent(opponentData);
+            setOpponentFinalScore(opponentData.score);
+          }
+
+          if (playerData) {
+            setPlayerFinalScore(playerData.score);
+          }
+
+          console.log(
+            'Final scores - Player:',
+            playerData?.score,
+            'Opponent:',
+            opponentData?.score
+          );
+
+          if (opponentData && playerData && opponentData.score === playerData.score) {
+            setWinner('draw');
+            toast.info("It's a draw! Both players have the same score.");
+          } else if (!data.winnerId) {
+            setWinner('draw');
+          } else {
+            const winner = data.players.find((p) => p.id === data.winnerId);
+            if (winner) setWinner(winner.username);
+          }
 
           if (data.reason === 'opponent_disconnected') {
             toast.info('Your opponent disconnected. You win by default!');
           }
-
-          setMatchEnded(true);
-          const opponentData = data.players.find((p) => p.id !== player.id);
-          if (opponentData) setOpponent(opponentData);
         }
       );
 
@@ -263,6 +303,7 @@ export default function Game({ difficulty, mode }: GameProps) {
 
       if (response.puzzle && response.puzzle.success && response.puzzle.game) {
         setGameId(response.puzzle.game.id);
+        console.log(response.puzzle);
         setPuzzles(response.puzzle.game.questions);
         resetTimer();
         startTimeRef.current = Date.now();
@@ -286,6 +327,11 @@ export default function Game({ difficulty, mode }: GameProps) {
   useEffect(() => {
     if (!puzzles || puzzles.length === 0) return;
 
+    if (matchEnded) {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      return;
+    }
+
     if (timeLeft > 0) {
       timerRef.current = setTimeout(() => {
         setTimeLeft(timeLeft - 1);
@@ -297,11 +343,11 @@ export default function Game({ difficulty, mode }: GameProps) {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [timeLeft, puzzles]);
+  }, [timeLeft, puzzles, matchEnded]);
 
   const resetTimer = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
-    setTimeLeft(30); // 30 seconds per puzzle
+    setTimeLeft(30);
     startTimeRef.current = Date.now();
   };
 
@@ -321,43 +367,6 @@ export default function Game({ difficulty, mode }: GameProps) {
 
     toast.error("Time's up!");
     moveToNextPuzzle();
-  };
-
-  const moveToNextPuzzle = () => {
-    if (!puzzles) return;
-
-    if (currentPuzzleIndex < puzzles.length - 1) {
-      setCurrentPuzzleIndex(currentPuzzleIndex + 1);
-      setUserInput('');
-      resetTimer();
-
-      if (isMultiplayer && roomId && currentPlayer) {
-        const updatedPlayer = {
-          ...currentPlayer,
-          currentPuzzleIndex: currentPuzzleIndex + 1,
-          score: totalScore,
-        };
-
-        setCurrentPlayer(updatedPlayer);
-        emit('updateProgress', { roomId, player: updatedPlayer });
-      }
-    } else {
-      if (isMultiplayer && roomId && currentPlayer) {
-        const finalPlayer = {
-          ...currentPlayer,
-          isFinished: true,
-          score: totalScore,
-          currentPuzzleIndex: puzzles.length,
-        };
-
-        setCurrentPlayer(finalPlayer);
-        emit('playerFinished', { roomId, player: finalPlayer });
-      } else {
-        submitGameResults();
-        setCurrentPuzzleIndex(0);
-        toast.success('You have completed all puzzles!');
-      }
-    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -386,22 +395,62 @@ export default function Game({ difficulty, mode }: GameProps) {
 
       setResults((prevResults) => [...prevResults, newResult]);
 
+      let newTotalScore = totalScore;
+
       if (res.isValid) {
         const pointsToAdd = isMultiplayer ? 10 : 1;
-        setTotalScore((prevScore) => prevScore + pointsToAdd);
+        newTotalScore = totalScore + pointsToAdd;
+        setTotalScore(newTotalScore);
         toast.success('Correct!');
       } else {
         setTimeLeft((prevTime) => prevTime - 5);
         toast.error(res.reason || 'Incorrect solution');
       }
 
-      moveToNextPuzzle();
+      moveToNextPuzzle(newTotalScore);
     } catch (error) {
       console.error('Error verifying solution:', error);
       toast.error('Error checking solution');
     }
 
     setUserInput('');
+  };
+
+  const moveToNextPuzzle = (newScore = totalScore) => {
+    if (!puzzles) return;
+
+    if (currentPuzzleIndex < puzzles.length - 1) {
+      setCurrentPuzzleIndex(currentPuzzleIndex + 1);
+      setUserInput('');
+      resetTimer();
+
+      if (isMultiplayer && roomId && currentPlayer) {
+        const updatedPlayer = {
+          ...currentPlayer,
+          currentPuzzleIndex: currentPuzzleIndex + 1,
+          score: newScore,
+        };
+
+        setCurrentPlayer(updatedPlayer);
+        emit('updateProgress', { roomId, player: updatedPlayer });
+      }
+    } else {
+      if (isMultiplayer && roomId && currentPlayer) {
+        const finalPlayer = {
+          ...currentPlayer,
+          isFinished: true,
+          score: newScore,
+          currentPuzzleIndex: puzzles.length,
+        };
+
+        setCurrentPlayer(finalPlayer);
+        emit('playerFinished', { roomId, player: finalPlayer });
+      } else {
+        submitGameResults();
+        setCurrentPuzzleIndex(0);
+        toast.success('You have completed all puzzles!');
+      }
+    }
   };
 
   const submitGameResults = async () => {
@@ -427,19 +476,20 @@ export default function Game({ difficulty, mode }: GameProps) {
     }
   };
 
-  // Render loading state
   if (isLoading) {
     return <Loader difficulty={difficulty} mode={mode} />;
   }
 
-  // Render online players list for multiplayer mode
   if (isMultiplayer && !roomId && !isWaitingForOpponent) {
     return (
       <div className='px-5 py-2'>
         <div className='flex items-start flex-col gap-1.5'>
-          <h1 className='text-4xl font-[900] tracking-wide text-white mb-1 font-air'>HECTOCLASH</h1>
+          <h1 className='text-4xl font-[900] tracking-wide text-white mb-1 font-air'>
+            {isDualMode ? 'DIRECT CHALLENGE' : 'HECTOCLASH'}
+          </h1>
           <p className='text-white mb-4 font-satoshi font-[500] text-sm'>
-            {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} Difficulty - Find Opponents
+            {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} Difficulty -
+            {isDualMode ? ' Challenge a Specific Player' : ' Find Opponents'}
           </p>
         </div>
 
@@ -455,17 +505,60 @@ export default function Game({ difficulty, mode }: GameProps) {
           sentInvitation={sentInvitation}
           onInvitePlayer={handleInvitePlayer}
           onPlaySolo={() => router.push('/dashboard/solo/' + difficulty)}
+          isDualMode={isDualMode}
         />
       </div>
     );
   }
 
-  // Render waiting for opponent state
+  console.log(opponent?.score, currentPlayer?.score);
+
   if (isMultiplayer && isWaitingForOpponent) {
-    return <Loader difficulty={difficulty} mode={mode} />;
+    return (
+      <div className='px-5 py-2'>
+        <div className='flex items-start flex-col gap-1.5'>
+          <h1 className='text-4xl font-[900] tracking-wide text-white mb-1 font-air'>
+            {isDualMode ? 'DIRECT CHALLENGE' : 'HECTOCLASH'}
+          </h1>
+          <p className='text-white mb-4 font-satoshi font-[500] text-sm'>
+            {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} Difficulty -
+            {isDualMode ? ' Waiting for player to accept...' : ' Finding an opponent...'}
+          </p>
+        </div>
+
+        <div className='game-mode-card p-6 flex flex-col items-center justify-center'>
+          <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#90FE95] mb-4'></div>
+          <p className='text-white text-lg mb-6'>
+            {isDualMode
+              ? 'Waiting for opponent to respond...'
+              : 'Looking for an opponent with matching criteria...'}
+          </p>
+
+          {!isDualMode && (
+            <button
+              onClick={() => {
+                emit('leaveMatchmaking', '');
+                setIsWaitingForOpponent(false);
+              }}
+              className='bg-[#292929] border border-[#90FE95] hover:bg-[#353B35] text-white px-6 py-3 rounded-lg transition-all duration-300'
+            >
+              Cancel Matchmaking
+            </button>
+          )}
+
+          {isDualMode && sentInvitation && (
+            <button
+              onClick={handleCancelInvitation}
+              className='bg-[#292929] border border-[#90FE95] hover:bg-[#353B35] text-white px-6 py-3 rounded-lg transition-all duration-300'
+            >
+              Cancel Invitation
+            </button>
+          )}
+        </div>
+      </div>
+    );
   }
 
-  // Render match ended state
   if (isMultiplayer && matchEnded) {
     return (
       <div className='px-5 py-2'>
@@ -473,14 +566,18 @@ export default function Game({ difficulty, mode }: GameProps) {
 
         <div className='game-mode-card multiplayer-card p-6 flex flex-col items-center justify-center mt-5'>
           <h2 className='text-2xl font-bold text-white mb-6 font-air capitalize'>
-            {winner === currentPlayer?.username ? 'You won! 🎉' : `${winner} won! 👑`}
+            {opponentFinalScore === playerFinalScore
+              ? "It's a draw! 🤝"
+              : winner === currentPlayer?.username
+                ? 'You won! 🎉'
+                : `${winner} won! 👑`}
           </h2>
 
           <div className='flex justify-between w-full max-w-md bg-[#292929] p-4 rounded-lg mb-6'>
             <div className='text-center font-satoshi'>
               <p className='text-gray-400'>You</p>
-              <p className='text-2xl font-bold text-white'>{totalScore}</p>
-              <p className='text-sm text-gray-400'>
+              <p className='text-2xl font-bold text-white'>{playerFinalScore}</p>
+              <p className='text-xs text-gray-400'>
                 {currentPlayer?.isFinished
                   ? 'Completed'
                   : `${currentPlayer?.currentPuzzleIndex}/${puzzles?.length} puzzles`}
@@ -489,8 +586,8 @@ export default function Game({ difficulty, mode }: GameProps) {
 
             <div className='text-center font-satoshi'>
               <p className='text-gray-400'>{opponent?.username}</p>
-              <p className='text-2xl font-bold text-white'>{opponent?.score}</p>
-              <p className='text-sm text-gray-400'>
+              <p className='text-2xl font-bold text-white'>{opponentFinalScore}</p>
+              <p className='text-xs text-gray-400'>
                 {opponent?.isFinished
                   ? 'Completed'
                   : `${opponent?.currentPuzzleIndex}/${puzzles?.length} puzzles`}
@@ -512,20 +609,34 @@ export default function Game({ difficulty, mode }: GameProps) {
   if (isMultiplayer && !isWaitingForOpponent) {
     return (
       <div className='px-5 py-2'>
-        <h1 className='text-4xl font-[900] tracking-wide text-white mb-1'>HECTOCLASH</h1>
+        <h1 className='text-4xl font-[900] tracking-wide text-white mb-1'>
+          {isDualMode ? 'DIRECT CHALLENGE' : 'HECTOCLASH'}
+        </h1>
         <p className='text-white mb-3 font-satoshi font-[500] text-sm'>
           {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} difficulty - VS{' '}
           {opponent?.username}
         </p>
 
-        {puzzles && (
-          <MultiplayerStatus
-            currentPlayer={currentPlayer}
-            opponent={opponent}
-            totalScore={totalScore}
-            puzzlesLength={puzzles.length}
-          />
-        )}
+        <div className='flex justify-between bg-[#292929] p-3 rounded-lg mb-4 text-white font-satoshi'>
+          <div className='text-center'>
+            <p>You: {totalScore} points</p>
+            <p className='text-xs text-gray-400'>
+              {currentPlayer?.isFinished
+                ? 'Completed'
+                : `${currentPuzzleIndex + 1}/${puzzles?.length}`}
+            </p>
+          </div>
+          <div className='text-center'>
+            <p>
+              {opponent?.username}: {opponent?.score || 0} points
+            </p>
+            <p className='text-xs text-gray-400'>
+              {opponent?.isFinished
+                ? 'Completed'
+                : `${opponent?.currentPuzzleIndex || 0}/${puzzles?.length}`}
+            </p>
+          </div>
+        </div>
 
         <div className='game-mode-card multiplayer-card p-6'>
           <GameBoard
@@ -541,7 +652,6 @@ export default function Game({ difficulty, mode }: GameProps) {
     );
   }
 
-  // Render solo game UI
   return (
     <div className='px-5 py-2'>
       <h1 className='text-4xl font-[900] tracking-wide text-white mb-1'>HECTOCLASH</h1>

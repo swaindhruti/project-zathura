@@ -1,14 +1,14 @@
 'use client';
 
 import React from 'react';
-import { Users } from 'lucide-react';
 import { OnlinePlayer } from '@/types/game';
 
-interface OnlinePlayersProps {
+interface OnlinePlayersListProps {
   onlinePlayers: OnlinePlayer[];
   sentInvitation: { id: string; toPlayer: string } | null;
   onInvitePlayer: (playerId: string) => void;
   onPlaySolo: () => void;
+  isDualMode?: boolean;
 }
 
 export default function OnlinePlayersList({
@@ -16,61 +16,69 @@ export default function OnlinePlayersList({
   sentInvitation,
   onInvitePlayer,
   onPlaySolo,
-}: OnlinePlayersProps) {
+  isDualMode = false,
+}: OnlinePlayersListProps) {
   return (
-    <>
-      <div className='game-mode-card multiplayer-card p-5 mb-6'>
-        <div className='flex items-center justify-between mb-4'>
-          <h2 className='text-xl font-bold text-white font-air'>ONLINE PLAYERS</h2>
-          <Users size={20} className='text-[#90FE95]' />
-        </div>
+    <div className='game-mode-card p-6'>
+      <h2 className='text-xl font-bold text-white mb-4'>
+        {isDualMode ? 'Select a Player to Challenge' : 'Online Players'}
+      </h2>
 
-        {onlinePlayers.length === 0 ? (
-          <div className='bg-[#292929] p-5 rounded-lg text-center font-satoshi'>
-            <p className='text-gray-400 py-2'>No players available right now</p>
-            <p className='text-xs text-gray-500'>Try again later or play solo</p>
-          </div>
-        ) : (
-          <div className='space-y-3'>
-            {onlinePlayers.map((player) => (
-              <div
-                key={player.id}
-                className='flex items-center justify-between bg-[#292929] p-3 rounded-lg border border-[#757575]/30 hover:border-[#90FE95]/30 transition-all'
-              >
-                <div>
-                  <p className='font-semibold text-white capitalize font-satoshi'>
-                    {player.username}
-                  </p>
-                  <div className='flex items-center'>
-                    <div
-                      className={`w-2 h-2 rounded-full mr-2 ${
-                        player.status === 'available' ? 'bg-green-500' : 'bg-yellow-500'
-                      }`}
-                    ></div>
-                    <p className='text-xs text-gray-400 font-satoshi'>
-                      {player.difficulty ? `${player.difficulty} difficulty` : 'Any difficulty'}
-                    </p>
-                  </div>
+      {onlinePlayers.length === 0 && (
+        <p className='text-gray-400 mb-4'>No players online at the moment.</p>
+      )}
+
+      {onlinePlayers.length > 0 && (
+        <div className='space-y-3 max-h-96 overflow-y-auto mb-6'>
+          {onlinePlayers.map((player) => (
+            <div
+              key={player.id}
+              className='flex justify-between items-center bg-[#292929] p-3 rounded-lg'
+            >
+              <div className='flex items-center'>
+                <div className='ml-3'>
+                  <p className='text-white font-medium'>{player.username}</p>
                 </div>
-                <button
-                  className='bg-[#292929] border border-[#90FE95] hover:bg-[#353B35] text-white px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 font-satoshi'
-                  disabled={!!sentInvitation}
-                  onClick={() => onInvitePlayer(player.id)}
-                >
-                  Challenge
-                </button>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+              <button
+                onClick={() => onInvitePlayer(player.id)}
+                disabled={!!sentInvitation}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  sentInvitation
+                    ? 'bg-gray-700 text-gray-300'
+                    : 'bg-[#353B35] border border-[#90FE95] text-white hover:bg-[#444F44]'
+                }`}
+              >
+                {sentInvitation && sentInvitation.toPlayer === player.username
+                  ? 'Invitation Sent'
+                  : 'Challenge'}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
-      <div className='text-center'>
-        <p className='text-gray-400 mb-3 font-satoshi'>Can't find anyone to play with?</p>
-        <button onClick={onPlaySolo} className='search-players-button font-satoshi'>
-          Play Solo Instead
-        </button>
-      </div>
-    </>
+      {!isDualMode && (
+        <div className='flex justify-center'>
+          <button
+            onClick={onPlaySolo}
+            className='bg-[#292929] border border-[#90FE95] hover:bg-[#353B35] text-white px-6 py-3 rounded-lg transition-all duration-300'
+          >
+            Play Solo Instead
+          </button>
+        </div>
+      )}
+
+      {isDualMode && (
+        <div className='flex justify-center'>
+          <button
+            onClick={() => window.history.back()}
+            className='bg-[#292929] border border-[#90FE95] hover:bg-[#353B35] text-white px-6 py-3 rounded-lg transition-all duration-300'
+          >
+            Back to Game Modes
+          </button>
+        </div>
+      )}
+    </div>
   );
 }

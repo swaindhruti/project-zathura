@@ -29,6 +29,7 @@ interface OnlinePlayer {
     id: string;
     username: string;
     difficulty: string | null;
+    mode: string | null; // Add mode to track what type of game the player is in
     socketId: string;
     status: "available" | "playing" | "away";
 }
@@ -50,6 +51,17 @@ const pendingInvitations: Map<
     }
 > = new Map();
 
+// Add a structure to handle players waiting for matchmaking
+const waitingPlayers: Map<
+    string,
+    {
+        player: OnlinePlayer;
+        difficulty: string;
+        mode: string; // Add mode
+        joinTime: Date;
+    }
+> = new Map();
+
 export const initializeGameController = (io: Server) => {
     io.on("connection", (socket: Socket) => {
         console.log(`Game socket connected: ${socket.id}`);
@@ -60,17 +72,22 @@ export const initializeGameController = (io: Server) => {
             ({
                 player,
                 difficulty,
+                mode, // Accept mode
             }: {
                 player: Player;
                 difficulty: string | null;
+                mode: string | null;
             }) => {
-                console.log(`Player ${player.username} is now online`);
+                console.log(
+                    `Player ${player.username} is now online with mode ${mode}`
+                );
 
                 // Add or update player in online players list
                 const onlinePlayer: OnlinePlayer = {
                     id: player.id,
                     username: player.username,
                     difficulty: difficulty,
+                    mode: mode, // Store mode
                     socketId: socket.id,
                     status: "available",
                 };
@@ -262,6 +279,124 @@ export const initializeGameController = (io: Server) => {
                 });
             }
         );
+
+        // Player joins general matchmaking (non-dual mode)
+        socket.on(
+            "joinMatchmaking",
+            async ({
+                player,
+                difficulty,
+                mode, // Accept mode
+            }: {
+                player: Player;
+                difficulty: string;
+                mode: string;
+            }) => {
+                console.log(
+                    `Player ${player.username} joined matchmaking for ${difficulty} (${mode})`
+                );
+
+                // Add player to waiting list
+                const onlinePlayer = onlinePlayers.get(player.id);
+                if (!onlinePlayer) {
+                    socket.emit("matchmakingError", {
+                        message: "Player not found",
+                    });
+                    return;
+                }
+
+                // Update player status
+                onlinePlayer.status = "playing";
+                onlinePlayer.difficulty = difficulty;
+                onlinePlayer.mode = mode;
+
+                waitingPlayers.set(player.id, {
+                    player: onlinePlayer,
+                    difficulty,
+                    mode, // Include mode in waitingPlayers
+                    joinTime: new Date(),
+                });
+
+                // Try to find a match based on both difficulty and mode
+                const matches = findMatchmakingMatch(
+                    player.id,
+                    difficulty,
+                    mode
+                );
+
+                if (matches) {
+                    const [playerId1, playerId2] = matches;
+                    const player1 = waitingPlayers.get(playerId1)?.player;
+                    const player2 = waitingPlayers.get(playerId2)?.player;
+
+                    if (player1 && player2) {
+                        // Remove players from waiting list
+                        waitingPlayers.delete(playerId1);
+                        waitingPlayers.delete(playerId2);
+
+                        // Create game room
+                        const roomId = uuidv4();
+                        const puzzles = await generatePuzzles(difficulty);
+
+                        const gamePlayer1: Player = {
+                            id: player1.id,
+                            username: player1.username,
+                            score: 0,
+                            currentPuzzleIndex: 0,
+                            isFinished: false,
+                            socketId: player1.socketId,
+                        };
+
+                        const gamePlayer2: Player = {
+                            id: player2.id,
+                            username: player2.username,
+                            score: 0,
+                            currentPuzzleIndex: 0,
+                            isFinished: false,
+                            socketId: player2.socketId,
+                        };
+
+                        // Create and store the game
+                        const gameRoom: GameRoom = {
+                            id: roomId,
+                            players: [gamePlayer1, gamePlayer2],
+                            puzzles,
+                            difficulty,
+                            startTime: new Date(),
+                            isActive: true,
+                        };
+
+                        activeGames.set(roomId, gameRoom);
+
+                        // Notify both players
+                        io.to(player1.socketId).emit("matchFound", {
+                            roomId,
+                            players: [gamePlayer1, gamePlayer2],
+                            puzzles,
+                        });
+
+                        io.to(player2.socketId).emit("matchFound", {
+                            roomId,
+                            players: [gamePlayer1, gamePlayer2],
+                            puzzles,
+                        });
+                    }
+                }
+            }
+        );
+
+        socket.on("leaveMatchmaking", () => {
+            const playerId = socket.data.playerId;
+            if (playerId) {
+                waitingPlayers.delete(playerId);
+
+                // Update player status
+                if (onlinePlayers.has(playerId)) {
+                    onlinePlayers.get(playerId)!.status = "available";
+                    broadcastOnlinePlayers(io);
+                }
+            }
+        });
 
         // Player updates progress - same as before
         socket.on(
@@ -473,4 +608,23 @@ async function generatePuzzles(difficulty: string): Promise<Puzzle[]> {
     }));
 
     return formattedPuzzles;
+}
+
+// Helper function to find a matching player for matchmaking
+function findMatchmakingMatch(
+    playerId: string,
+    difficulty: string,
+    mode: string
+): [string, string] | null {
+    // Check if there's another player waiting with the same difficulty AND mode
+    for (const [otherPlayerId, data] of waitingPlayers.entries()) {
+        if (
+            otherPlayerId !== playerId &&
+            data.difficulty === difficulty &&
+            data.mode === mode
+        ) {
+            return [playerId, otherPlayerId];
+        }
+    }
+    return null;
 }
