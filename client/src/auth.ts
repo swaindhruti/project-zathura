@@ -45,7 +45,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
 
         user = await login(email as string, password as string);
-
+        console.log('User:', user);
         if (!user) {
           console.error('Authentication failed: No user returned from login');
           throw new Error('Invalid credentials.');
@@ -56,16 +56,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }: { token: JWT; user?: { id?: string; accessToken?: string } }) {
+    async jwt({
+      token,
+      user,
+    }: {
+      token: JWT;
+      user?: { id?: string; accessToken?: string; username?: string };
+    }) {
       if (user) {
         token.accessToken = user?.accessToken;
         token.id = user.id;
+        token.username = user.username;
+        token.user = user;
       }
       return token;
     },
     async session({ session, token }) {
       session.accessToken = token.accessToken;
       session.user.id = token.id ?? '';
+      session.user.username = token.username ?? '';
+
       return session;
     },
   },
@@ -80,6 +90,7 @@ declare module 'next-auth' {
     accessToken?: string;
     user: {
       id?: string;
+      username?: string;
       name?: string | null;
       email?: string | null;
       image?: string | null;
@@ -91,5 +102,6 @@ declare module 'next-auth/jwt' {
   interface JWT {
     accessToken?: string;
     id?: string;
+    username?: string;
   }
 }

@@ -204,6 +204,7 @@ export const initializeGameController = (io: Server) => {
                 const puzzles = await generatePuzzles(invitation.difficulty);
 
                 // Create player objects for the game
+                console.log(invitation);
                 const player1: Player = {
                     id: invitation.from.id,
                     username: invitation.from.username,
