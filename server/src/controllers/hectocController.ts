@@ -22,6 +22,7 @@ export const getPuzzle = async (
         const puzzle = await hectocService.createHectocGame(userId, {
             difficulty,
         });
+        console.log(puzzle);
 
         res.status(200).json({
             puzzle,
