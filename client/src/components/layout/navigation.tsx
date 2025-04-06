@@ -13,7 +13,7 @@ const GameNavigation: React.FC = ({}) => {
   };
 
   return (
-    <div className='fixed bottom-0 left-0 right-0 bg-[#1A1A1A] border-t border-gray-800 flex justify-around py-4'>
+    <div className='fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[475px] bg-[#1A1A1A] border-t border-gray-800 flex justify-around py-4'>
       <Link
         href='/dashboard'
         className={`nav-item font-satoshi ${isActive('/dashboard') ? 'nav-active' : 'text-gray-400'}`}

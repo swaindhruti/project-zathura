@@ -1,25 +1,22 @@
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
 
 import { Users, Clock, User } from 'lucide-react';
 import GameModeCard from '@/components/dashboard/game-mode-card';
-import GameHeader from '@/components/dashboard/game-header';
-import GameNavigation from '@/components/layout/navigation';
+
 import Image from 'next/image';
 
 const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState('arena');
-
   return (
-    <div className='px-5 py-2  flex flex-col h-[78dvh] items-start justify-between'>
-      <div className='flex items-start flex-col gap-1.5'>
+    <div className='px-5 py-2 flex flex-col h-[78dvh]'>
+      {/* Header section fixed at top */}
+      <div className='flex items-start flex-col gap-1.5 mb-6'>
         <h1 className='text-4xl font-[900] tracking-wide text-white mb-1'>HECTOCLASH</h1>
-        <p className='text-white mb-8 font-satoshi font-[500] text-sm'>
-          Welcome to the arena warrior!
-        </p>
+        <p className='text-white font-satoshi font-[500] text-sm'>Welcome to the arena warrior!</p>
       </div>
 
-      <div className='flex flex-col gap-3 w-full'>
+      {/* Game modes centered in the remaining space */}
+      <div className='flex flex-col gap-3 w-full flex-grow flex-shrink-0 justify-center'>
         <GameModeCard
           link='/dashboard/multiplayer'
           title='MULTIPLAYER'
