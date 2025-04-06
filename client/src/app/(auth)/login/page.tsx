@@ -67,30 +67,33 @@ export default function LoginPage() {
   }
 
   return (
-    <div className='flex items-center justify-center min-h-screen px-4'>
-      <Card className='w-full max-w-md'>
-        <CardHeader>
-          <CardTitle className='text-2xl'>Welcome back</CardTitle>
-          <CardDescription>Enter your credentials to sign in to your account</CardDescription>
+    <div className='flex items-center justify-center min-h-screen px-4 bg-[#1E1E1E]'>
+      <Card className='w-full max-w-md bg-[#292929] border border-[#49454F] shadow-md'>
+        <CardHeader className='space-y-1'>
+          <CardTitle className='text-2xl font-bold text-white font-satoshi'>Welcome back</CardTitle>
+          <CardDescription className='text-[#86858d]'>
+            Enter your credentials to sign in to your account
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+            <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
               <FormField
                 control={form.control}
                 name='email'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel className='text-white'>Email</FormLabel>
                     <FormControl>
                       <Input
                         type='email'
                         placeholder='email@example.com'
                         {...field}
                         disabled={isLoading}
+                        className='bg-[#1A1A1A] border-[#6D6D6D] text-white focus-visible:ring-[#90FE95] focus-visible:border-[#90FE95]'
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className='text-[#ff6b6b]' />
                   </FormItem>
                 )}
               />
@@ -99,29 +102,35 @@ export default function LoginPage() {
                 name='password'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel className='text-white'>Password</FormLabel>
                     <FormControl>
                       <Input
                         type='password'
                         placeholder='********'
                         {...field}
                         disabled={isLoading}
+                        className='bg-[#1A1A1A] border-[#6D6D6D] text-white focus-visible:ring-[#90FE95] focus-visible:border-[#90FE95]'
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className='text-[#ff6b6b]' />
                   </FormItem>
                 )}
               />
-              <Button type='submit' className='w-full' disabled={isLoading}>
+              <Button
+                type='submit'
+                className='w-full py-6 rounded-xl border border-[#90FE95] bg-[#292929] text-white font-medium transition-all duration-300 hover:scale-105 active:scale-95 active:translate-y-1 focus:outline-none focus:ring-2 focus:ring-[#3AFFE1]'
+                disabled={isLoading}
+                style={{ boxShadow: '0px 3px 0px 0px #3affe1' }}
+              >
                 {isLoading ? 'Signing in...' : 'Sign in'}
               </Button>
             </form>
           </Form>
         </CardContent>
-        <CardFooter className='flex justify-center'>
-          <div className='text-sm text-center'>
+        <CardFooter className='flex justify-center pb-6'>
+          <div className='text-[#86858d]'>
             Don&apos;t have an account?{' '}
-            <Link href='/register' className='text-primary hover:underline'>
+            <Link href='/register' className='text-[#90FE95] hover:underline font-medium'>
               Register
             </Link>
           </div>
