@@ -3,16 +3,16 @@
   .touch-action-none {
     touch-action: none;
   }
-  
+
   .touch-dragging {
     opacity: 0.4;
   }
-  
+
   .highlight-drop-target {
     background-color: rgba(74, 222, 128, 0.3) !important;
     box-shadow: 0 0 0 2px #4ade80;
   }
-  
+
   .touch-dragging-visual {
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
     color: #4ade80;
