@@ -25,9 +25,12 @@ export const middleware = async (request: {
     return NextResponse.next();
   }
 
+  if (pathname === '/') {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
   return NextResponse.next();
 };
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/login', '/register'],
+  matcher: ['/dashboard/:path*', '/login', '/register', '/'],
 };

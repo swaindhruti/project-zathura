@@ -16,7 +16,7 @@ export const useApi = () => {
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
     const url = `${API_URL}${endpoint}`;
-
+    console.log('url', url);
     try {
       const response = await axios.request({
         method,

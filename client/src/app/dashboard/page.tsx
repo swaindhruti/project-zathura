@@ -45,7 +45,7 @@ const Dashboard = () => {
           <GameModeCard
             link='coming-soon'
             title='TOURNAMENT'
-            subtitle='Quick-Duel Match'
+            subtitle='Lead your team to victory!'
             className='tournament-card'
             tags={[
               {
@@ -72,9 +72,9 @@ const Dashboard = () => {
 
           <div className='grid grid-cols-2 gap-2'>
             <GameModeCard
-              link='/dashboard/dual'
+              link='/dashboard/friend'
               title='VS FRIENDS'
-              subtitle='Quick-Duel Match'
+              subtitle='Challenge your friends!'
               className='friends-card'
               tags={[
                 {

@@ -1,7 +1,5 @@
 import React from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { FlameIcon, TestTube, UserCircle } from 'lucide-react';
+import { ArrowLeft, Menu } from 'lucide-react';
 
 interface GameHeaderProps {
   firePoints: number;
@@ -10,22 +8,19 @@ interface GameHeaderProps {
 
 const GameHeader: React.FC<GameHeaderProps> = ({ firePoints, xpPoints }) => {
   return (
-    <div className='flex justify-between items-center px-5 py-3 bg-black/20'>
-      <div className='flex gap-3'>
-        <div className='flex items-center gap-1'>
-          <FlameIcon />
-          <span className='text-white text-sm font-[500]'>{firePoints}</span>
+    <div className='flex justify-between items-center py-4 px-4'>
+      <Menu size={24} />
+      <div className='flex gap-2'>
+        <div className='rounded-full bg-[#292929] px-3 py-1 flex items-center gap-1.5'>
+          <span className='text-orange-500'>🔥</span>
+          <span className='text-white font-semibold font-inter'>{firePoints}</span>
         </div>
 
-        <div className='flex items-center gap-1'>
-          <TestTube />
-          <span className='text-white text-sm font-[500]'>{xpPoints}</span>
+        <div className='rounded-full bg-[#292929] px-3 py-1 flex items-center gap-1.5'>
+          <span className='text-yellow-400'>🏅</span>
+          <span className='text-white font-semibold font-inter'>{xpPoints} XP</span>
         </div>
       </div>
-
-      <Link href='/dashboard/profile' className='text-white hover:text-[#90FE95] transition-colors'>
-        <UserCircle size={28} />
-      </Link>
     </div>
   );
 };
